@@ -41,3 +41,14 @@ def problem2():
     #  : 을 이용해서 키 - 데이터 구분지어 작성
     키_대화_결과들 = {키이름 : 대화데이터 for 키이름, 대화데이터 in messages.items()}
     print(f"단톡 데이터들 :{키_대화_결과들}")
+
+
+def problem3():
+    사이트이름 = ["네이버","구글","다음"]
+    주소 = ["www.naver.com","www.google.com","www.daum.net"]
+    카테고리 =["포털","검색엔진","포털"]
+
+    for 이름, url, 종류 in zip(사이트이름, 주소, 카테고리):
+        print(f"{이름} : {url} ({종류})")
+
+problem3()
