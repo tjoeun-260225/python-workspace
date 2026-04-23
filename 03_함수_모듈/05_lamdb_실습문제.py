@@ -45,7 +45,7 @@ print(풀네임("김", "철수"))  # → 김철수
 
 # lambda 로 조회수 기준 내림차순 정렬
 # sorted 오름차순  sorted(reverse=True) -> 오름차순 거꾸로 뒤집어서 정렬하기 = 내림차순
-결과 = sorted(뉴스, key=lambda x: ["조회수"], reverse=True)
+결과 = sorted(뉴스, key=lambda x: x["조회수"], reverse=True)
 
 for 기사 in 결과:
     print(기사["제목"], 기사["조회수"])
@@ -62,7 +62,7 @@ def 친구들나이(x):
 
 
 # lambda 로 나이 기준 오름차순 정렬
-결과 = sorted(친구들, 친구들나이)
+결과 = sorted(친구들, key=친구들나이)
 
 for 친구 in 결과:
     print(친구["이름"], 친구["나이"])
