@@ -57,15 +57,30 @@ def profile(name, age, city):
 
 profile(age=25, city="서울", name='민수')  # 순서 상관 없이 매개변수 이름에 맞춰서 데이터 전달할 수 있다.
 
+
 ## 3. 가변 인수
 #    *args : 개수   제한 없이    받기 (튜 플 로 들어옴) 튜플은 받아온 값을 수정할 수 없다.
 # 데이터를 받아올 것인데 개수 제한을 하고싶지 않을 때 사용
 def 총합(*args):
     return sum(args)
-print(총합(1,2,3,4,5))
+
+
+print(총합(1, 2, 3, 4, 5))
+
 
 # **kwargs : 키워드 인수 여러 개 받기 (딕셔너리 들어옴) { "키이름":"데이터"}
 def 정보(**kwargs):
     for k, v in kwargs.items():
         print(f"{k} : {v}")
-정보(name="철수",age=20, city="부산")
+
+
+정보(name="철수", age=20, city="부산")
+
+
+## 4. 기본값이 존재하는 매개변수와 기본값이 없는 매개변수가 있을 때
+#  기본값이 없는 age 와 name 은 반드시 기본값이 있는 매개변수들보다 맨 앞쪽으로 우선적으로 위치해야한다.
+# def 매개변수들( age, height=175.5, name, hobby="음악듣기"):
+def 매개변수들(name, age, height=175.5, hobby="음악듣기"):
+    print(f" {age}세 {name}은 키는 {height} 이며, 취미는 {hobby} 이다.")
+
+
