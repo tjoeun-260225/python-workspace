@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>상세페이지</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+        }
+        .카드 {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+<h1>회원 상세정보</h1>
+<div class="카드">
+    <p>이름 : {{회원.name}}</p>
+    <p>이메일 : {{회원.email}}</p>
+</div>
+<a href="/">← 목록으로</a>
+</body>
+</html>

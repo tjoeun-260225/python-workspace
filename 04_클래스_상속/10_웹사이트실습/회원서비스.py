@@ -19,3 +19,11 @@ class 회원서비스:
         cursor = self.conn.cursor()
         cursor.execute("DELETE FROM users WHERE id = %s", (아이디,))
         self.conn.commit()
+
+    def 상세조회(self, id):
+        cursor = self.conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM users WHERE id = %s", (id,))
+        return cursor.fetchone()
+        # fetchall = 전체 / fetchone = 한명만
+
+
