@@ -42,22 +42,21 @@ while 실행중:
             실행중 = False
 
     # 키보드 입력으로 공 이동
-    키 = pygame.key.get_pressed()
-    if 키[pygame.K_LEFT]: 공_x -= 속도
-    if 키[pygame.K_RIGHT]: 공_x += 속도
-    if 키[pygame.K_UP]: 공_y -= 속도
-    if 키[pygame.K_DOWN]: 공_y += 속도
+    키 = pygame.key.get_pressed()         # 키 안에 모든 키 의 상태변수가 들어있는 상태
+    if 키[pygame.K_LEFT]: 공_x -= 속도    # 공x 가로 위치를 x가 줄면 왼쪽 이동
+    if 키[pygame.K_RIGHT]: 공_x += 속도   # 공x 가 늘면 속도만큼 오른쪽으로 이동
+    if 키[pygame.K_UP]: 공_y -= 속도      # 공y 가 줄면 위쪽으로 이동
+    if 키[pygame.K_DOWN]: 공_y += 속도    # 공y 가 늘면 아래쪽 이동
 
     # 벽충돌(화면 밖으로 공이 나가지 못하게
     공_x = max(공크기, min(800 - 공크기, 공_x))
     공_y = max(공크기, min(600 - 공크기, 공_y))
 
     # 2. 화면 그리기
-    화면.fill(검정)  # 화면 배경색 (R, G, B)  255,255,255 화이트
+    # 화면.fill(검정)  # 화면 배경색 (R, G, B)  255,255,255 화이트
     pygame.draw.circle(화면, 빨강, (공_x, 공_y), 공크기)
 
     pygame.display.flip()  # 화면 갱신
-
     시계.tick(60)  # 초당 60 프레임
 
 pygame.quit()
