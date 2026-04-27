@@ -1,5 +1,19 @@
 from db import DB연결
 
+'''
+class 회원서비스:
+    def __init__(self):
+        self.conn = DB연결()
+
+public class 회원서비스 {
+         private Connection conn;          // self.conn
+         
+         public 회원서비스(){              // def __init__(self):
+                 this.conn = DB연결();     // self.conn = DB연결()
+         }
+}
+
+'''
 
 class 회원서비스:
     def __init__(self):
