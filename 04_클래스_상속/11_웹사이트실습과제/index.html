@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+{% for __ in 상품들 %}
+<div class="상품카드">
+    <p>{{ 상품.name }}</p>
+    <p>{{ 상품.price }} 원</p>
+    <a href="/상품/{{상품.id}}">상세보기</a>
+</div>
+{% __ %}
+</body>
+</html>
