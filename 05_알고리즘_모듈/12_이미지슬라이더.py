@@ -80,7 +80,7 @@ class 이미지회전앱:
         self.각도라벨.pack()
 
     def 이미지열기(self):
-        경로 = filedialog.askopenfilename(filetypes=[("이미지","*.png *.jpg *.jpeg *.bmp *gif")])
+        경로 = filedialog.askopenfilename(filetypes=[("이미지","*.png *.jpg *.jpeg *.bmp *.gif")])
         if 경로:
             self.원본이미지 = Image.open(경로)
             self.현재각도 = 0
