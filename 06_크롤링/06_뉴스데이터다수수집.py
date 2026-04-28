@@ -51,9 +51,8 @@ def url목록가져오기():
     soup = BeautifulSoup(res.text,"html.parser")
 
     랭크목록 = []
-    태그들 = soup.select("a.list_title") # css 선택자 findAll 처럼 여러개 갖고올 때 사용
-
-    for 태그 in 태그들[:20]: #최대 20개 까지만 설정 0~19 까지
+    태그들 = soup.select("a.list_title")
+    for 태그 in 태그들[:20]:
         링크 = 태그.get("href")
         if 링크 and "article" in 링크 :
             if 링크.startswith("/"):
