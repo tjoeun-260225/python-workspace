@@ -1,4 +1,6 @@
 # 뉴스를 보고 분석
+import time
+
 import requests
 import newspaper
 from bs4 import BeautifulSoup
@@ -47,9 +49,21 @@ def 기사수집(url):
 
 
 
+def 뉴스20개수집():
+    url목록 = url목록가져오기()
 
+    # 순서번호, 데이터 하나씩  ,start=1 을 작성하지 않으면 i는 0번부터 실행
+    for i, url in enumerate(url목록):
+        print(f"\n[ {i+1}번째 뉴스 기사 ]")
+        제목, 내용, 기자, 날짜 = 기사수집(url)
+        print("제목 :",제목)
+        print("내용 :",내용)
+        print("기자 :",기자)
+        print("날짜 :",날짜)
+        time.sleep(1) # 너무 빠르면 로봇인 것을 인지하고 ip 일시 차단된다. 1초씩 쉬면서 데이터 가져오기
 
-
+    print("수집 완료")
+뉴스20개수집()
 
 
 
