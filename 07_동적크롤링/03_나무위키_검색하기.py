@@ -1,6 +1,14 @@
 from playwright.sync_api import sync_playwright
 import time
-
+'''
+playwright 시작
+    → 브라우저 열기
+            →  검색어마다 페이지 이동
+                → 제목 + 본문 가져오기
+                    →  출력
+    →  브라우저 닫기
+→  playwright 종료
+'''
 
 def 나무위키기본():
     p = sync_playwright().start()   # playwright 실행 시작
@@ -25,3 +33,5 @@ def 나무위키기본():
 
     browser.close() # 열린 크롬 브라우저 닫기
     p.stop() # playwright 종료
+
+나무위키기본()
