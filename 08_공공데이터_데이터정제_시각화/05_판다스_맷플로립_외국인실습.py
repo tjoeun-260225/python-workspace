@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 plt.rcParams['font.family'] = 'Malgun Gothic'
 plt.rcParams['axes.unicode_minus'] = False
 
-df = pd.read_csv("국토교통부_외국인_조종사_국적별_현황_20250331.csv", encoding="cp949")
+df = pd.read_csv("국토교통부_외국인 조종사 국적별 현황_20250331.csv", encoding="cp949")
 # 항공사 컬럼만 추출 (국적 컬럼 제외)
 #국적	대한항공	아시아나항공	에어부산	이스타항공	제주항공	진에어	티웨이	에어서울	에어로케이	에어프레미아	에어제타
 
