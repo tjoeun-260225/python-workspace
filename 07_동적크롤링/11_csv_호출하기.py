@@ -4,7 +4,7 @@
 import pandas as pd
 
 # 1. 불러오기 (한글 파일은 cp949 인코딩)
-df = pd.read_csv("행정안전부_착한가격업소 현황_20260331.csv", encoding="cp949")
+df = pd.read_csv("../08_공공데이터_데이터정제_시각화/행정안전부_착한가격업소 현황_20260331.csv", encoding="cp949")
 
 # 2. 기본 확인
 print(df.shape) # 행 수 열 수
