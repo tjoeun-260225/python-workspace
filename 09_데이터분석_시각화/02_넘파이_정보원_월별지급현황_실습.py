@@ -28,7 +28,7 @@ def step2():
     # value_counts() 가 없었다면 len(df['사업명']=='기초연금') 을 일일이 하나씩 다 써주어야 하는 상황 발생!
 
 
-# STEP 3 - NumPay 기본 통계 계산
+# STEP 3 - NumPy 기본 통계 계산
 def step3():
     # 지급 금액만 배열로 추출
     금액 = df['지급금액'].values  # NumPy 배열로 변환되어 데이터 리스트 형태로 보관
@@ -91,5 +91,32 @@ def step6():
     plt.ylabel('평균 지급금액(백만원)')
     plt.tight_layout()
     plt.show()
-step6()
+
+
 # STEP 7 - Matplotlib 선그래프 그리기 (plot) - 사업명 3개를 한 화면에서 비교
+def step7():
+    사업목록 = df['사업명'].unique()  # 중복 제거하고 unique한 값만 뽑기
+    fig, axes = plt.subplots(1, 3, figsize=(15, 5)) # 그래프를 여러칸으로 나누기
+    # plt.subplots(행, 열, figsize=크기)
+    # ┌───────────────────────────────────────────┐
+    # │  axes[0]    │    axes[1]   │  axes[2]    │
+    # │  기초생활   │   장애인복지 │  기초연금   │
+    # │  그래프     │    그래프   │    그래프   │
+    # └────────────────────────────────────────┘
+    #                          1행 3열짜리 그래프 칸 3개   총 3개의 그래프 크기 사이즈
+    # fig, axes = plt.subplots(1,     3,                  figsize=(15, 5))
+    # fig  = 전체 화면 틀 도화지
+    # axes = 각각의 그래프 칸 (리스트)
+    # enumerate 번호랑 값을 같이 뽑아주는 기능  값에 번호를 0번부터 매겨주는 것
+    for i, 사업 in enumerate(사업목록):
+        data = df[df['사업명'] == 사업]
+        월별 = data.groupby('기준년월')['지급금액'].sum()
+
+        axes[i].plot(월별.index, 월별.values, marker='o')
+        axes[i].set_title(사업)
+        axes[i].set_xlabel('월')
+        axes[i].set_ylabel('지급금액')
+        axes[i].tick_params(axis='x', rotation=90)
+    plt.tight_layout()
+    plt.show()
+step7()

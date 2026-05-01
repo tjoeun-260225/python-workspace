@@ -2,6 +2,9 @@
 pip install numpy
 
 import numpy as np # np 는 numpy 이름이 너무 길어서 np로 줄여서 작성하겠다.
+
+리스트 계산 for 문 너무 힘듦
+줄여서 마치 하나의 변수들을 다루는 것처럼 하겠다!!!
 '''
 
 import numpy as np
