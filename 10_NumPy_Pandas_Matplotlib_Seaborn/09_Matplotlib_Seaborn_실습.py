@@ -1,3 +1,16 @@
+'''
+loc - pandas DataFrame / Series 에서라벨(이름) 기반으로 데이터를 선택하는 인덱서
+dt.loc[행] 행라벨로 선택
+dt.loc[행, 열] 행 + 열 라벨로 선택
+
+axes = 여러 그래프를 만들 때 subplot 에서 접근하는 배열
+한 줄에서
+axes[0] 왼쪽 그래프
+axes[1] 오른쪽 그래프
+
+
+
+'''
 import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
