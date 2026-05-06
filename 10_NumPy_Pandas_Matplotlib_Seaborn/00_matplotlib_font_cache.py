@@ -21,3 +21,7 @@ def step2():
 def step3():
     fonts = [f.name for f in fm.fontManager.ttflist]
     print("D2Coding" in fonts)
+
+# step1()
+# step2()
+# step3()
