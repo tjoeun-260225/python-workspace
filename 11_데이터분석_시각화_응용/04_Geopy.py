@@ -30,9 +30,13 @@ from geopy.geocoders import GoogleV3 # Google         기반 유료
 # 참고로 한국의 경우는 Nominatim 을 이용하는 것보다 Kakao에서
 # 무료 API를 발급받아 사용하는 것이 더 정확
 
-geolocoder = Nominatim(user_agent='test')
-location_1 = geolocoder.geocode('서울특별시 마포구 월드컵로 72')
-location_2 = geolocoder.geocode('이상한주소')
+geolocoder_1 = Nominatim(user_agent='test')
+geolocoder_2 = Nominatim(user_agent='홍길동')
+# Nominatim 지도 서비스를 꺼내서 서버에 test 유저라 보낸다.
+# user_agent = Nominatim 서버에게 나는 test 라는 사람이다 하고 보내는 이름표
+# 아무 문자열이나 작성해도 된다.
+location_1 = geolocoder_1.geocode('서울특별시 마포구 월드컵로 72')
+location_2 = geolocoder_2.geocode('이상한주소')
 
 print(location_1.latitude) # 37.562096 위도
 print(location_1.longitude) # 126.9046772 경도
