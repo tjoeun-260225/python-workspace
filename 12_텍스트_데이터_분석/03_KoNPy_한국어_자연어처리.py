@@ -91,7 +91,7 @@ def wordcloud_okt_연결():
     stopwords = {'것', '수', '등', '및', '더', '이', '그', '저', '때', '년', '들'}
 
     # 컴프리핸션 리스트로 변환
-    filtered = [w  for w in nouns if w not in stopwords and len(w) > 1]
+    filtered = [w for w in nouns if w not in stopwords and len(w) > 1]
     '''
     filtered = []
 
@@ -104,8 +104,30 @@ def wordcloud_okt_연결():
     counts = Counter(filtered)
     print("상위 10개 : ", counts.most_common(10))
 
+    # 6. 한글 폰트 경로 설정
+    font_path = 'C:/Windows/Fonts/malgun.ttf'
 
+    # 7. WordCloud 생성
+    wc = WordCloud(
+        font_path=font_path,
+        width=800,
+        height=400,
+        background_color='white',
+        max_words=100,
+        colormap='Set2'
+    ).generate_from_frequencies(counts)
+    # 계산된 빈도의 결과를 추가
+
+    plt.figure(figsize=(10, 5))
+    plt.imshow(wc, interpolation='bilinear')
+    plt.axis('off')
+    plt.savefig("korean_word_cloud.png", dpi=150) # Dots Per Inch 1인치 안에 점(픽셀)이 몇개 들어가는지 나타내는 해상도 단위
+    # 높을 수록 선명하다
+    # 낮은 용도 화면용 평균 150 인쇄용 300 정도
+    plt.show()
+
+wordcloud_okt_연결()
 def 한글폰트위치확인():
     print(os.path.exists('C:/Windows/Fonts/malgun.ttf'))
 
-한글폰트위치확인()
+# 한글폰트위치확인()
