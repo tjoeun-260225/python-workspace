@@ -142,6 +142,23 @@ def folium_excel_위도경도():
     # 위와 같은 사항을 데이터 전처리 -> 데이터로 결과를 만들기 전 전부다 처리 작업
 
 
+def folium_excel_위도경도():
+    df = pd.read_excel('공공자전거 대여소 정보(25.12월 기준).xlsx', header=None, skiprows=4)
+    print(df.columns)
+    print(df.head())
+    df.columns = ["대여소번호", "대여소명", "자치구", "상세주소", "위도", "경도", "설치시기",
+                                                        "LCD거치대", "QR거치대", "운영방식"]
+
+    df = df.dropna(subset=["위도","경도"])
+    m = folium.Map(location=[37.5665, 126.9780], zoom_start=15)
+
+    for _, row in df.iterrows():
+        folium.Marker(
+            location=[row["위도"], row["경도"]]
+        ).add_to(m)
+    m.save("따릉이지도.html")
+
+
 
 def folium_excel_클러스터링():
 
@@ -149,14 +166,18 @@ def folium_excel_클러스터링():
     print(df.columns)
     print(df.head())
 
-    df.columns = ["대여소번호", "대여소명", "자치구", "상세주소", "위도", "경도", "설치시기", "LCD거치대", "QR거치대", "운영방식"]
+    df.columns = ["대여소번호", "대여소명", "자치구", "상세주소", "위도", "경도", "설치시기",
+                                                        "LCD거치대", "QR거치대", "운영방식"]
     df = df.dropna(subset=["위도","경도"])
     m = folium.Map(location=[37.5665, 126.9780], zoom_start=15)
-    cluster = MarkerCluster().add_to(m) # 클러스터 생성
+    cluster = MarkerCluster().add_to(m)
     for _, row in df.iterrows():
         folium.Marker(
             location=[row["위도"], row["경도"]]
-        ).add_to(cluster) # m 이 아닌 클러스터에 추가
+        ).add_to(cluster)
+       # ).add_to(MarkerCluster().add_to(m))
+        #  위도 경도를 마커가 너무 많으면 동그라미 표기해주는 곳에 세팅할 거고
+        # 동그라미 표기법은 folium 에서 제공하는 지도 형태를 따를 것이다.
     m.save("따릉이지도.html")
 
-folium_excel_클러스터링()
+folium_excel_위도경도()
