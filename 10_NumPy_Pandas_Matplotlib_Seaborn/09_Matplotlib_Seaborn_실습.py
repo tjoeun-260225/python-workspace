@@ -16,7 +16,7 @@ import seaborn as sns
 import pandas as pd
 import numpy as np
 
-plt.rcParams['font.family'] = 'Malgun Gothic'
+plt.rcParams['font.family'] = 'D2Coding'
 plt.rcParams['axes.unicode_minus'] = False
 
 
@@ -54,7 +54,7 @@ def matplotlib문제2():
     sns.set_theme(style='whitegrid')
     sns.set_palette('pastel')
 
-    df = pd.read_csv('서울교통공사_역별_일별_시간대별_승하차인원_정보_20241231.csv', encoding='euc-kr')
+    df = pd.read_csv('서울교통공사_역별 일별 시간대별 승하차인원 정보_20241231.csv', encoding='euc-kr')
 
     시간대 = [col for col in df.columns if '시' in col or '시간대' in col]
     df['총인원'] = df[시간대].sum(axis=1)  # 시간대 컬럼들을 행 방향으로 합산, axis=?
@@ -156,3 +156,4 @@ def matplotlib문제2():
 
     plt.tight_layout()
     plt.show()
+matplotlib문제2()
