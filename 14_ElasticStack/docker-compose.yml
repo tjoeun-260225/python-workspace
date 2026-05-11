@@ -1,0 +1,48 @@
+# 반드시 상대경로나 절대경로를 제대로 인지하지 못할 경우에는
+# docker-compose.yml 을 작성한 폴더에서
+# docker compose up -d
+# 위 명령어 실행
+# 참고로 회사는 이미 모든 세팅이 되어 있다.
+# 우리는 도커 컴포즈를 이런식으로 작성하는구나 정도 알면 된다.
+
+# 파이썬에서는 v9 인데 docker 이미에는 8.19.3 버전 불일치
+# pip install Elasticsearch = 최신버전 설치
+# pip 에 맞춰서 도커버전을 수정하거나
+
+# 도커버전에 맞는 Elasticsearch 를 pip install 로 설치할 수 있다.
+# pip uninstall elasticsearch -y
+# pip install elasticsearch== 8.17.0
+
+
+# 아래 코드는 Elasticsearch + Kibana 환경을 Docker로 구성하는 설정
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.19.3
+    container_name: es01
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - xpack.security.enabled=false  # 개발 편의용 세팅 / 실제 운영에서는 True
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.19.3
+    container_name: kibana01
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    depends_on:
+      - elasticsearch
+
+volumes:
+  esdata:
+    driver: local
