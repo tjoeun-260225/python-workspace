@@ -11,13 +11,16 @@
 
 # 도커버전에 맞는 Elasticsearch 를 pip install 로 설치할 수 있다.
 # pip uninstall elasticsearch -y
-# pip install elasticsearch== 8.17.0
-
+# pip install elasticsearch==8.19.0
+# 엘라스틱서치 9.0 25년 4월 15일 출시
 
 # 아래 코드는 Elasticsearch + Kibana 환경을 Docker로 구성하는 설정
 services:
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.19.3
+    # 만약 python에 존재하는 elasticsearch 9v 으로 변경하고 싶다면
+    # image: docker.elastic.co/elasticsearch/elasticsearch:9.4.0
+    # 위와 같이 변경
     container_name: es01
     environment:
       - discovery.type=single-node
@@ -35,6 +38,9 @@ services:
 
   kibana:
     image: docker.elastic.co/kibana/kibana:8.19.3
+    # 만약 python에 존재하는 elasticsearch 9v 으로 변경하고 싶다면
+    # image: docker.elastic.co/kibana/kibana:9.4.0
+    # 위와 같이 변경
     container_name: kibana01
     ports:
       - "5601:5601"
