@@ -23,3 +23,14 @@ docker-compose.yml
 -- cmd 명령 프로프트 창에
 docker run -d --name es01 --e discovery.type=signle-node 식으로 수기로 모든세팅을 작성해야한다.
 '''
+
+"""
+하나의 컴포즈 파일 실행 방법
+docker compose up -f 파일이름.yml  -d
+docker compose up -f 파일이름.yaml -d
+
+여러 파일 동시에 사용도 가능
+docker compose up -f 파일이름1.yml -f 파일이름2.yaml -f 파일이름3.yaml -d
+
+도커 명령어 
+"""
