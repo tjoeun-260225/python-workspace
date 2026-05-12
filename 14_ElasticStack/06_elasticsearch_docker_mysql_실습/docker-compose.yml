@@ -1,0 +1,61 @@
+services: # 컨테이너들을 여기에 정의할게 시작 선언
+  mysql:  # 서비스 이름 (개발자가 어떤 라이브러리, 프레임워크, 모듈에 관련된 세팅인지 확인하기 위한 명칭
+    image: mysql:8.0 # 도커허브에서 MySQL8.0 이미지 가져오기
+    # 도커허브에서 유명한 라이브러리들은 상세 주소를 작성하지 않아도 된다.
+    # 별칭처럼 라이브러리:버전 을 작성하면 해당 주소에서 알아서
+    # 라이브러리 관련 설치 도구들을 가져와서 컨테이너에 세팅
+    container_name: mysql-db # 필수가 아님. 작성하지 않으면 컨테이너에서 임의으로 이름 생성
+    # docker ps 컨테이너에서 라이브러리 상태 확인할 때 사용할 명칭
+    restart: always # 컨테이너가 꺼지면 자동으로 재시작
+    environment: # 초기 설정값들
+      MYSQL_ROOT_PASSWORD: rootpassword # root 비밀번호
+      MYSQL_DATABASE: shopdb # 시작할 때 자동으로 만들 DB 이름
+      MYSQL_USER: shopuser   # 일반 유저 아이디
+      MYSQL_PASSWORD: shoppassword # 일반 유저 비밀번호
+    ports: # 내 pc 컨테이너 연결 포트
+      - "3307:3306" # 내 피시 3306번 으로 접속하면 : 컨테이너 3306 으로 연결해줘
+      # "9999:3306 파이썬 코드에서는 9999 라고 작성하고 db 연결에선 3306 으로 작성
+    volumes: # Mysql 저장 공간 선언
+      - mysql-data:/var/lib/mysql # DB 데이터를 내 PC에 저장 컨테이너 삭제해도 데이터 안 날아감
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql # 처음 실행할 때 init.sql 자동 실행 products 테이블 자동 생성
+    healthcheck: # mysql 도커에서 제대로 준비되었는지 체크
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"] #체크 관련 명령어
+      interval: 10s # 10초마다 mysql 문제없는지 상태 체크
+      timeout: 5s   # 5초 안에 응답 없으면 실패
+      retries: 5    # 5번 실패하면 mysql 문제있음을 개발자에게 보고
+
+  elasticsearch:
+    image: elasticsearch:8.19.3
+    container_name: elasticsearch
+    restart: always
+    environment:
+      - discovery.type=single-node # 혼자 실행 개발용 원래 엘라스틱서치는 다수 서버를 묶어서 사용
+      - xpack.security.enabled=false # 보안 기능 끄기(개발용 편의) 배포용에서는 True
+      - xpack.security.http.ssl.enabled=false # HTTPS 배포용주소 끄기 개발용 편의 배표용에선 True
+      - ES_JAVA_OPTS=-Xms1g -Xmx1g # 컴퓨터 메모리 최소 1GB ~ 최대 1GB 할당
+    ports:
+      - "9200:9200"
+    volumes:
+      - es-data:/usr/share/elasticsearch/data # ES 데이터도 내 피시 저장
+    healthcheck: # 엘라스틱서치 문제 없는지 상태
+      test: ["CMD-SHELL", "curl -s http://localhost:9200/_cluster/health | grep -q 'green\\|yellow'"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+
+  kibana:
+    image: kibana:8.19.3
+    container_name: kibana
+    restart: always
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - xpack.security.enabled=false
+    ports:
+      - "5601:5601"
+    depends_on: # 엘라스틱서치가 있어야지만 실행이되는 모듈 엘라스틱서치가 실행되고나서 kibana 실행하겠다.
+      elasticsearch:
+        condition: service_healthy
+
+volumes: # mysql 사용하고, 엘라스틱서치 사용하겠다.
+  mysql-data:
+  es-data:

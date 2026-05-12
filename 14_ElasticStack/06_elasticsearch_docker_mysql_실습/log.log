@@ -1,0 +1,21 @@
+docker-compose.yml
+- mysql / elasticsearch / kibana 도커 컨테이너 하나 생성후 설치
+
+init.py
+- MYSQL DB 테이블 생성
+
+config.py
+- mysql 과 같은 주소 / 비밀번호 같은 설정값 모아놓은 곳
+
+db.py
+- MySQL에 가짜 상품 데이터 50만개 넣는 곳
+
+es_index.py
+- ElasticSearch에 데이터 옮기는 작업 (MySQL -> elasticsearch)
+
+search.py
+- MySQL         에서 직접 데이터를 가져오는 것 과
+  elasticsearch 에서      데이터를 가져오는 것 속도 차이
+
+main.py
+- 최종 실행 파일 만들 것
