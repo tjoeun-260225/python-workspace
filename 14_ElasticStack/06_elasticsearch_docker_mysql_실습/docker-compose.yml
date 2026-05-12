@@ -1,5 +1,5 @@
 services: # 컨테이너들을 여기에 정의할게 시작 선언
-  mysql:  # 서비스 이름 (개발자가 어떤 라이브러리, 프레임워크, 모듈에 관련된 세팅인지 확인하기 위한 명칭
+  mysql: # 서비스 이름 (개발자가 어떤 라이브러리, 프레임워크, 모듈에 관련된 세팅인지 확인하기 위한 명칭
     image: mysql:8.0 # 도커허브에서 MySQL8.0 이미지 가져오기
     # 도커허브에서 유명한 라이브러리들은 상세 주소를 작성하지 않아도 된다.
     # 별칭처럼 라이브러리:버전 을 작성하면 해당 주소에서 알아서
@@ -19,7 +19,7 @@ services: # 컨테이너들을 여기에 정의할게 시작 선언
       - mysql-data:/var/lib/mysql # DB 데이터를 내 PC에 저장 컨테이너 삭제해도 데이터 안 날아감
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql # 처음 실행할 때 init.sql 자동 실행 products 테이블 자동 생성
     healthcheck: # mysql 도커에서 제대로 준비되었는지 체크
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"] #체크 관련 명령어
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ] #체크 관련 명령어
       interval: 10s # 10초마다 mysql 문제없는지 상태 체크
       timeout: 5s   # 5초 안에 응답 없으면 실패
       retries: 5    # 5번 실패하면 mysql 문제있음을 개발자에게 보고
@@ -38,7 +38,7 @@ services: # 컨테이너들을 여기에 정의할게 시작 선언
     volumes:
       - es-data:/usr/share/elasticsearch/data # ES 데이터도 내 피시 저장
     healthcheck: # 엘라스틱서치 문제 없는지 상태
-      test: ["CMD-SHELL", "curl -s http://localhost:9200/_cluster/health | grep -q 'green\\|yellow'"]
+      test: [ "CMD-SHELL", "curl -s http://localhost:9200/_cluster/health | grep -q 'green\\|yellow'" ]
       interval: 15s
       timeout: 10s
       retries: 10
