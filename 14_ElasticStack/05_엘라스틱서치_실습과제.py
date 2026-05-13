@@ -1,4 +1,4 @@
-from elasticsearch import Elasticsearch
+from elasticsearch import Elasticsearch, NotFoundError
 
 es = Elasticsearch("http://localhost:9200")
 
@@ -7,11 +7,11 @@ es.indices.delete(index="movies", ignore=[400, 404])
 es.indices.create(index="movies", ignore=400)
 
 movies = [
-    {"id": 1, "title": "어벤져스",     "genre": "액션",   "rating": 8.4, "year": 2012},
-    {"id": 2, "title": "기생충",       "genre": "드라마", "rating": 8.6, "year": 2019},
+    {"id": 1, "title": "어벤져스", "genre": "액션", "rating": 8.4, "year": 2012},
+    {"id": 2, "title": "기생충", "genre": "드라마", "rating": 8.6, "year": 2019},
     {"id": 3, "title": "어벤져스 엔드게임", "genre": "액션", "rating": 8.4, "year": 2019},
-    {"id": 4, "title": "인터스텔라",   "genre": "SF",     "rating": 8.6, "year": 2014},
-    {"id": 5, "title": "버드박스",     "genre": "공포",   "rating": 6.6, "year": 2018},
+    {"id": 4, "title": "인터스텔라", "genre": "SF", "rating": 8.6, "year": 2014},
+    {"id": 5, "title": "버드박스", "genre": "공포", "rating": 6.6, "year": 2018},
 ]
 
 for movie in movies:
@@ -20,43 +20,43 @@ for movie in movies:
 print("데이터 세팅 완료\n")
 
 # ──────────────────────────────────────────────────────
-# TODO 1. title에 "어벤져스" 가 포함된 문서를 검색하고
-#         title과 year를 출력하세요
-# 힌트: es.search(index=..., body={"query": {"match": {...}}})
-# 출력 예시:
-# - 어벤져스 (2012)
-# - 어벤져스 엔드게임 (2019)
-
-query1 = None  # TODO: 여기를 채우세요
-# result1 = es.search(???)
-# for hit in result1["hits"]["hits"]:
-#     print(???)
+query1 = {"query": {"match": {"title": "어벤져스"}}}
+result1 = es.search(index="movies", body=query1)
+for hit in result1["hits"]["hits"]:
+    src = hit["_source"]
+    print(f"- {src["title"]} ({src['year']})")
 
 # ──────────────────────────────────────────────────────
-# TODO 2. genre가 "액션" 인 문서를 검색하고
-#         title, genre, rating을 출력하세요
 # 출력 예시:
 # - 어벤져스 | 액션 | 8.4
 
-query2 = None  # TODO: 여기를 채우세요
-
+query2 = {"query": {"term": {"gener.keyword": "액션"}}}
+result2 = es.search(index="movies", body=query2)
+for hit in result2["hits"]["hits"]:
+    src = hit["_source"]
+    print(f"- {src['title']} | {src['genre']} | {src['rating']}")
 # ──────────────────────────────────────────────────────
-# TODO 3. id=4 문서의 rating을 9.0으로 수정하고
-#         수정된 결과를 조회해서 출력하세요
-# 힌트: es.update(index=..., id=..., doc={...})
-# 출력 예시: 수정 후: {'title': '인터스텔라', 'rating': 9.0, ...}
-
-# TODO: 여기를 채우세요
-
+es.update(index="movies", id=4, doc={"rating": 9.0})
+updated = es.get(index="movies", id=4)
+print(f"수정 후 : {updated['_source']}")
 # ──────────────────────────────────────────────────────
-# TODO 4. id=5 문서를 삭제하고
-#         삭제 후 id=5 조회 시 "삭제된 문서입니다" 출력하세요
 # 힌트: es.delete() 후 try/except
-
-# TODO: 여기를 채우세요
-
+es.delete(index='movies', id=5)
+try:
+    es.get(index='movies', id=5)
+except NotFoundError:
+    print("삭제된 문서입니다.")
+# 확인되지 않은 참조 'NotFoundError'
+# elasticsearch 에서 문서를 찾을 수 없을 때 표기하기 위한 자체 에러 표기법
+# NotFoundError 라는 에러가 발생했을 때 대처를 하기 위해서는
+# elasticsearch 에서 제공하는 NotFoundError 표기
+# from elasticsearch import Elasticsearch, NotFoundError
 # ──────────────────────────────────────────────────────
-# TODO 5. movies 인덱스 전체를 삭제하세요
-#         삭제 후 "movies 인덱스 삭제 완료" 출력
+es.indices.delete(index="movies")
+print("movies 인덱스(=테이블) 전체 삭제 완료")
 
-# TODO: 여기를 채우세요
+'''
+NewConnectionError(HTTPConnection(host='localhost', port=9200): 
+Failed to establish a new connection: [WinError 10061] 대상 컴퓨터에서 연결을 거부했으므로 연결하지 못했습니다))
+
+'''
