@@ -42,6 +42,12 @@ print(f"수정 후 : {updated['_source']}")
 # ──────────────────────────────────────────────────────
 # 힌트: es.delete() 후 try/except
 es.delete(index='movies', id=5)
+# 이미 get 을 통해서 삭제한 엘라스틱서치를 검색하려 하면
+# elasticsearch.NotFoundError: NotFoundError(404, "{'_index': 'movies', '_id': '5', 'found': False}")
+# 발생한다는 것을 미리 확인했기 때문에
+# 바로 try / except 를 작성한 것
+# 처음 접하는 개발자라면 try / except 없이 NotFoundError 를 겪은 후
+# try / except 를 이용해서 에러 예외 처리를 해야하는 것
 try:
     es.get(index='movies', id=5)
 except NotFoundError:
