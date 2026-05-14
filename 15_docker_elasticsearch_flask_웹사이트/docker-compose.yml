@@ -1,0 +1,65 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql_db
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: userdb
+      MYSQL_USER: appuser
+      MYSQL_PASSWORD: apppass
+    ports:
+      - "3308:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./mysql_init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    ports:
+      - "9200:9200"
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+# docker-compose 에서 flask 실행하는 구조
+#  flask:
+#    image: python:3.13-slim
+#    container_name: flask_app
+#    working_dir: /app
+#    command: >
+#      sh -c "pip install flask flask-sqlalchemy pymysql elasticsearch faker --quiet &&
+#             python run.py"
+#    environment:
+#      MYSQL_HOST: mysql
+#      MYSQL_PORT: 3306
+#      MYSQL_DB: userdb
+#      MYSQL_USER: appuser
+#      MYSQL_PASSWORD: apppass
+#      ES_HOST: elasticsearch
+#      ES_PORT: 9200
+#    ports:
+#      - "5000:5000"
+#    depends_on:
+#      mysql:
+#        condition: service_healthy
+#      elasticsearch:
+#        condition: service_healthy
+#    volumes:
+#      - ./flask_app:/app
+
+volumes:
+  mysql_data:
+  es_data:

@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8"/>
+    <title>User Explorer</title>
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #0f1117;
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 0.3rem;
+            color: #fff;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+
+        .badge-green {
+            background: #1a4731;
+            color: #4ade80;
+        }
+
+        .badge-red {
+            background: #4a1a1a;
+            color: #f87171;
+        }
+
+        .subtitle {
+            color: #888;
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: #1a1d27;
+            border: 1px solid #2a2d3e;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .card h2 {
+            font-size: 1rem;
+            color: #aaa;
+            margin-bottom: 1rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .row {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        input[type="text"], input[type="number"] {
+            background: #0f1117;
+            border: 1px solid #2a2d3e;
+            border-radius: 8px;
+            color: #e0e0e0;
+            padding: 0.5rem 1rem;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color .2s;
+        }
+
+        input:focus {
+            border-color: #6366f1;
+        }
+
+        input[type="number"] {
+            width: 100px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        button {
+            padding: 0.5rem 1.2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity .2s;
+        }
+
+        button:hover {
+            opacity: 0.85;
+        }
+
+        .btn-primary {
+            background: #6366f1;
+            color: #fff;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: #fff;
+        }
+
+        .btn-ghost {
+            background: #2a2d3e;
+            color: #e0e0e0;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 1rem;
+        }
+
+        .stat-box {
+            background: #0f1117;
+            border: 1px solid #2a2d3e;
+            border-radius: 10px;
+            padding: 1rem 1.2rem;
+        }
+
+        .stat-box .label {
+            font-size: 0.75rem;
+            color: #888;
+            margin-bottom: 0.3rem;
+        }
+
+        .stat-box .value {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        th {
+            background: #12141e;
+            color: #888;
+            font-weight: 600;
+            padding: 0.6rem 0.8rem;
+            text-align: left;
+            border-bottom: 1px solid #2a2d3e;
+        }
+
+        td {
+            padding: 0.6rem 0.8rem;
+            border-bottom: 1px solid #1e2030;
+            color: #ccc;
+        }
+
+        tr:hover td {
+            background: #1e2133;
+        }
+
+        .pagination {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            justify-content: center;
+        }
+
+        .pagination button {
+            padding: 0.4rem 0.9rem;
+            font-size: 0.8rem;
+        }
+
+        .pagination button.active {
+            background: #6366f1;
+            color: #fff;
+        }
+
+        #msg {
+            min-height: 1.4rem;
+            font-size: 0.85rem;
+            color: #4ade80;
+            margin-top: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+
+<h1>
+    User Explorer
+    <span class="badge {{ 'badge-green' if es_ok else 'badge-red' }}">
+    ES {{ '● ON' if es_ok else '● OFF' }}
+  </span>
+</h1>
+<p class="subtitle">MySQL + Elasticsearch · 가짜 사용자 데이터 데모</p>
+
+<!-- ── 데이터 생성 ── -->
+<div class="card">
+    <h2>데이터 생성</h2>
+    <div class="row">
+        <input type="number" id="seedCount" value="20" min="1" max="500"/>
+        <button class="btn-primary" onclick="seed()">Faker 생성</button>
+        <button class="btn-danger" onclick="deleteAll()">전체 삭제</button>
+    </div>
+    <div id="msg"></div>
+</div>
+
+<!-- ── 통계 ── -->
+<div class="card">
+    <h2>통계</h2>
+    <div class="stats-grid">
+        <div class="stat-box">
+            <div class="label">MySQL 총 레코드</div>
+            <div class="value" id="statMySQL">{{ total }}</div>
+        </div>
+        <div class="stat-box">
+            <div class="label">Elasticsearch 도큐먼트</div>
+            <div class="value" id="statES">-</div>
+        </div>
+    </div>
+    <br/>
+    <button class="btn-ghost" onclick="loadStats()">새로고침</button>
+</div>
+
+<!-- ── 전문 검색 ── -->
+<div class="card">
+    <h2>Elasticsearch 검색</h2>
+    <div class="row">
+        <input type="text" id="searchQ" placeholder="이름, 회사, 직업, 도시 검색..."/>
+        <button class="btn-primary" onclick="doSearch()">검색</button>
+    </div>
+    <br/>
+    <div id="searchResult"></div>
+</div>
+
+<!-- ── 유저 목록 ── -->
+<div class="card">
+    <h2>유저 목록 (MySQL)</h2>
+    <div id="tableWrap"></div>
+    <div class="pagination" id="pagination"></div>
+</div>
+
+<script>
+    let currentPage = 1;
+
+    /* ── 유틸 ── */
+    function msg(text, color = '#4ade80') {
+        const el = document.getElementById('msg');
+        el.style.color = color;
+        el.textContent = text;
+    }
+
+    function buildTable(users) {
+        if (!users.length) return '<p style="color:#888">결과 없음</p>';
+        const cols = ['id', 'name', 'email', 'phone', 'job', 'company', 'city', 'created_at'];
+        const ths = cols.map(c => `<th>${c}</th>`).join('');
+        const rows = users.map(u =>
+            `<tr>${cols.map(c => `<td>${u[c] ?? ''}</td>`).join('')}</tr>`
+        ).join('');
+        return `<table><thead><tr>${ths}</tr></thead><tbody>${rows}</tbody></table>`;
+    }
+
+    /* ── 데이터 생성 ── */
+    async function seed() {
+        const count = +document.getElementById('seedCount').value || 20;
+        msg('생성 중...');
+        const res = await fetch('/api/seed', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({count})
+        });
+        const data = await res.json();
+        msg(`${data.added}건 추가 완료 (총 ${data.total}건)`);
+        loadStats();
+        loadUsers(1);
+    }
+
+    /* ── 전체 삭제 ── */
+    async function deleteAll() {
+        if (!confirm('전체 데이터를 삭제할까요?')) return;
+        await fetch('/api/delete_all', {method: 'DELETE'});
+        msg('🗑 삭제 완료', '#f87171');
+        loadStats();
+        loadUsers(1);
+    }
+
+    /* ── 통계 ── */
+    async function loadStats() {
+        const data = await fetch('/api/stats').then(r => r.json());
+        document.getElementById('statMySQL').textContent = data.mysql;
+        document.getElementById('statES').textContent = data.elasticsearch;
+    }
+
+    /* ── 유저 목록 ── */
+    async function loadUsers(page = 1) {
+        currentPage = page;
+        const data = await fetch(`/api/users?page=${page}&per=10`).then(r => r.json());
+
+        document.getElementById('tableWrap').innerHTML = buildTable(data.users);
+
+        const pg = document.getElementById('pagination');
+        pg.innerHTML = '';
+        for (let i = 1; i <= data.pages; i++) {
+            const btn = document.createElement('button');
+            btn.textContent = i;
+            btn.className = 'btn-ghost' + (i === page ? ' active' : '');
+            btn.onclick = () => loadUsers(i);
+            pg.appendChild(btn);
+        }
+    }
+
+    /* ── 검색 ── */
+    async function doSearch() {
+        const q = document.getElementById('searchQ').value.trim();
+        if (!q) return;
+        const data = await fetch(`/api/search?q=${encodeURIComponent(q)}`).then(r => r.json());
+        const wrap = document.getElementById('searchResult');
+        wrap.innerHTML = `<p style="color:#888;margin-bottom:.5rem">검색결과 ${data.total}건</p>`
+            + buildTable(data.hits);
+    }
+
+    /* ── 엔터키로 검색 ── */
+    document.getElementById('searchQ').addEventListener('keydown', e => {
+        if (e.key === 'Enter') doSearch();
+    });
+
+    /* ── 초기 로드 ── */
+    loadStats();
+    loadUsers(1);
+</script>
+</body>
+</html>
