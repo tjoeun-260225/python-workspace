@@ -1,5 +1,5 @@
 import os
-
+# application.properties
 class Config:
     MYSQL_USER     = os.getenv("MYSQL_USER",     "appuser")
     MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD", "apppass")

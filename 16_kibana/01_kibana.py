@@ -83,6 +83,12 @@ logs-*
 - 포  함   검 색 = message:"*Fail*" 
 """
 
+"""
+Maps / Dashboard / Alerting / 기본 보안
+-> 관리자 페이지 월별매출 카테고리 지역과 같은 관리자 대시보드 세팅
+
+"""
+
 
 
 
