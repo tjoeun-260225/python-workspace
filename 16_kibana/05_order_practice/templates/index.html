@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}상품 목록 - ShopDemo{% endblock %}
+
+{% block content %}
+
+<div class="hero">
+    <div>
+        <h2>오늘의 추천 상품</h2>
+        <p>다양한 카테고리의 상품을 둘러보세요</p>
+    </div>
+    <div class="seed-panel" style="margin:0; border:none; background:transparent; padding:0;">
+        <input type="number" id="seedCount" value="20" min="1" max="200"/>
+        <button class="btn btn-primary" onclick="seedData()">더미 생성</button>
+        <button class="btn btn-danger" onclick="deleteAll()">전체 삭제</button>
+        <span id="toast-msg"></span>
+    </div>
+</div>
+
+<p class="section-title">전체 상품</p>
+
+<div class="product-grid">
+    {% for p in products %}
+    <div class="product-card" onclick="location.href='/product/{{ p.id }}'">
+        <img src="{{ p.image_url }}" alt="{{ p.name }}"
+             onerror="this.src='https://via.placeholder.com/400x300?text=No+Image'"/>
+        <div class="card-body">
+            <div class="card-category">{{ p.category }}</div>
+            <div class="card-name">{{ p.name }}</div>
+            <div class="card-price">{{ "{:,}".format(p.price) }}<span>원</span></div>
+        </div>
+    </div>
+    {% endfor %}
+
+    {% if not products %}
+    <div style="grid-column:1/-1; text-align:center; padding:60px; color:#aaa;">
+        상품이 없습니다. 위에서 더미 데이터를 생성해보세요!
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

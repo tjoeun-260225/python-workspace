@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}주문 내역 - ShopDemo{% endblock %}
+
+{% block content %}
+
+<p class="section-title">주문 현황</p>
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="s-label">전체 주문</div>
+        <div class="s-value" id="statOrders">-</div>
+        <div class="s-sub">MySQL 기준</div>
+    </div>
+    <div class="stat-card">
+        <div class="s-label">회원 수</div>
+        <div class="s-value" id="statUsers">-</div>
+    </div>
+    <div class="stat-card">
+        <div class="s-label">상품 종류</div>
+        <div class="s-value" id="statProducts">-</div>
+    </div>
+    <div class="stat-card">
+        <div class="s-label">ES 도큐먼트</div>
+        <div class="s-value" id="statES">-</div>
+        <div class="s-sub">Elasticsearch</div>
+    </div>
+</div>
+
+<div id="statusChips" style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:24px;"></div>
+
+<div class="filter-bar">
+    <input type="text" id="searchInput" placeholder="상품명, 고객명, 카테고리 검색 (ES)..."/>
+    <button class="btn btn-primary" onclick="searchOrders()">검색</button>
+    <button class="btn btn-gray"    onclick="loadOrders(1)">전체 보기</button>
+    <span id="resultCount" style="font-size:0.82rem; color:#888;"></span>
+</div>
+
+<div style="background:#fff; border:1px solid #e5e8eb; border-radius:10px; padding:20px;">
+    <div class="table-wrap">
+        <table>
+            <thead>
+            <tr>
+                <th>주문번호</th>
+                <th>고객명</th>
+                <th>상품명</th>
+                <th>카테고리</th>
+                <th>수량</th>
+                <th>결제금액</th>
+                <th>상태</th>
+                <th>주문일</th>
+            </tr>
+            </thead>
+            <tbody id="orderTbody">
+            <tr><td colspan="8" style="text-align:center; color:#aaa; padding:40px;">로딩 중...</td></tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="pagination" id="pagination"></div>
+</div>
+
+<div style="background:#e6f9ee; border:1px solid #b2f0ce; border-radius:10px;
+            padding:20px 24px; margin-top:28px; display:flex;
+            justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+    <div>
+        <strong style="color:#03c75a;">Kibana 대시보드</strong>
+        <p style="color:#555; font-size:0.88rem; margin-top:4px;">
+            카테고리별 매출, 상태별 주문 수, 시간대별 주문 트렌드를 Kibana에서 분석하세요
+        </p>
+    </div>
+    <a href="http://localhost:5601" target="_blank" class="btn btn-primary">Kibana 열기</a>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    loadStats();
+    loadOrders(1);
+
+    document.getElementById("searchInput")
+        .addEventListener("keydown", e => { if (e.key === "Enter") searchOrders(); });
+</script>
+{% endblock %}

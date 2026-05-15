@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}{{ product.name }} - ShopDemo{% endblock %}
+
+{% block content %}
+
+<div style="margin-bottom:16px;">
+    <a href="/" style="color:#03c75a; font-size:0.88rem;">← 상품 목록으로</a>
+</div>
+
+<div class="detail-wrap">
+    <img class="detail-img"
+         src="{{ product.image_url }}"
+         alt="{{ product.name }}"
+         onerror="this.src='https://via.placeholder.com/600?text=No+Image'"/>
+
+    <div class="detail-info">
+        <div class="detail-category">{{ product.category }}</div>
+        <h1>{{ product.name }}</h1>
+        <div class="detail-price">
+            {{ "{:,}".format(product.price) }}<small>원</small>
+        </div>
+
+        <div style="color:#666; font-size:0.88rem; margin-bottom:20px;">
+            재고: <strong>{{ product.stock }}</strong>개
+        </div>
+
+        <div class="qty-wrap">
+            <button onclick="changeQty(-1)">-</button>
+            <span id="qtyDisplay">1</span>
+            <button onclick="changeQty(1)">+</button>
+            <span style="font-size:0.85rem; color:#888;">개</span>
+        </div>
+
+        <div style="font-size:1.1rem; margin-bottom:20px;">
+            총 결제금액: <strong id="totalPrice">
+            {{ "{:,}".format(product.price) }}원
+        </strong>
+        </div>
+
+        <button class="btn btn-primary" style="width:100%; padding:14px;"
+                onclick="openModal()">
+            주문하기
+        </button>
+    </div>
+</div>
+
+<div id="orderModal" class="modal-backdrop">
+    <div class="modal">
+        <h3>주문 정보 입력</h3>
+        <div class="form-group">
+            <label>이름</label>
+            <input type="text" id="inputName" placeholder="홍길동"/>
+        </div>
+        <div class="form-group">
+            <label>이메일</label>
+            <input type="email" id="inputEmail" placeholder="example@email.com"/>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-gray"    onclick="closeModal()">취소</button>
+            <button class="btn btn-primary" onclick="submitOrder()">결제하기</button>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    window.PRODUCT_ID    = {{ product.id }};
+    window.PRODUCT_PRICE = {{ product.price }};
+</script>
+{% endblock %}
