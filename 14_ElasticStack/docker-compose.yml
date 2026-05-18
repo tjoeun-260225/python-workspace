@@ -1,5 +1,5 @@
 # 반드시 상대경로나 절대경로를 제대로 인지하지 못할 경우에는
-# docker-compose.yml 을 작성한 폴더에서
+# docker-compose_flask.yml 을 작성한 폴더에서
 # docker compose up -d
 # 위 명령어 실행
 # 참고로 회사는 이미 모든 세팅이 되어 있다.

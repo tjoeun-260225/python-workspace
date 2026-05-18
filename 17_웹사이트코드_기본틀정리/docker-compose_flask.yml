@@ -1,9 +1,3 @@
-# docker-compose 를 ai를 이용하여 생성할 때
-# 현재는 우선 flask 는 제거하고 생성
-# docker-compose 내에 flask 를 작성하면 인텔리제이로 flask를 실행하는 것이 아니라
-# docker 에서 flask를 실행하게 된다.
-# 프로젝트 전반적인 구조를 docker-compose 에 기입할 수 있는 형태
-# RDB + ElasticSearch (option = + Kibana + FileBeat + Logstash)
 services:
   mysql:
     image: mysql:8.0
@@ -52,17 +46,40 @@ services:
       elasticsearch:
         condition: service_healthy
 
+  flask:
+    build: .
+    container_name: flask_order
+    environment:
+      - MYSQL_USER=appuser
+      - MYSQL_PASSWORD=apppass
+      - MYSQL_HOST=mysql
+      - MYSQL_PORT=3306
+      - MYSQL_DB=orderdb
+      - ES_HOST=elasticsearch
+      - ES_PORT=9200
+      - FLASK_DEBUG=true
+      - PORT=5000
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./logs:/app/logs          # Filebeat와 공유할 로그 폴더
+    depends_on:
+      mysql:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+
   filebeat:
     image: docker.elastic.co/beats/filebeat:8.11.0
     container_name: filebeat_order
-    user: root
+    user: root                    # 로그 파일 읽기 권한
     volumes:
-      - ./filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
-      - ./logs:/app/logs:ro
+      - ./filebeat.yml:/usr/share/filebeat/filebeat.yml:ro  # 설정 파일 (읽기 전용)
+      - ./logs:/app/logs:ro       # Flask 로그 폴더 (읽기 전용)
     depends_on:
       elasticsearch:
         condition: service_healthy
-    command: filebeat -e -strict.perms=false
+    command: filebeat -e -strict.perms=false   # 개발 환경 권한 체크 완화
 
 volumes:
   mysql_data:

@@ -1,4 +1,4 @@
-# Q1. docker-compose.yml 파일에서 Elasticsearch가 사용하는 포트 번호는 무엇인가요?
+# Q1. docker-compose_flask.yml 파일에서 Elasticsearch가 사용하는 포트 번호는 무엇인가요?
 # 답: 9200
 #
 # Q2. Kibana는 어떤 주소로 접속하나요?

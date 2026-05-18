@@ -1,0 +1,31 @@
+# filebeat.yml
+
+filebeat.inputs:
+  - type: log
+    enabled: true
+    paths:
+      - /app/logs/app.log          # Docker 컨테이너 내부 경로
+    json.keys_under_root: true     # JSON 필드를 최상위로 올림
+    json.add_error_key: true       # 파싱 실패 시 에러 필드 추가
+    json.message_key: message      # 메인 메시지 필드 지정
+
+    # 같은 라인에서 끊기지 않도록
+    multiline.type: pattern
+    multiline.pattern: '^\{'       # { 로 시작하면 새 로그 라인
+    multiline.negate: true
+    multiline.match: after
+
+    fields:
+      service: order-app
+      env: development
+    fields_under_root: true        # 위 fields를 최상위로 올림
+
+output.elasticsearch:
+  hosts: ["elasticsearch:9200"]   # docker-compose 서비스명 사용
+  index: "order-app-logs-%{+yyyy.MM.dd}"  # 날짜별 인덱스
+
+setup.ilm.enabled: false          # ILM 비활성 (간단한 데모용)
+setup.template.name: "order-app-logs"
+setup.template.pattern: "order-app-logs-*"
+
+logging.level: info               # Filebeat 자체 로그 레벨

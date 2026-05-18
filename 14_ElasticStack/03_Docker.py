@@ -16,7 +16,7 @@ Docker = dock(항구 부두) + er(하는 것)
 엘라스틱서치 자체를 나의 컴퓨터에 맞추어 설치하려면 매우 까다로움
 버전관리가 용이 / 여러 도구를 같이 사용
 
-docker-compose.yml
+docker-compose_flask.yml
 - 여러 Docker 컨테이너를 한 번에 정의 하고 실행하는 설정 파일
 
 -- 만약 도커 컴포즈 파일을 이용하지 않는다면
@@ -40,7 +40,7 @@ docker compose ps      # 실행중인 컨테이너 목록
 docker compose logs -f # 컨테이너에서 어떤 작업이 되고 있는지 기록보기
 docker compose restart # 컨테이너 재부팅
 
-docker-compose.yml 기본 코드
+docker-compose_flask.yml 기본 코드
 services:
     web:
         image:사용할 모듈 경로 / 이름
