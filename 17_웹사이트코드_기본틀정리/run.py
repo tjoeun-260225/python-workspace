@@ -69,6 +69,10 @@ from db import db
 from routes import routes
 import es_client as es_service
 
+from logger import get_logger
+
+log = get_logger("run")
+
 
 def create_app():
     app = Flask(__name__)
@@ -86,10 +90,12 @@ if __name__ == "__main__":
             try:
                 db.create_all()
                 es_service.ensure_index()
-                print("DB & ES 준비 완료")
+                # print("DB & ES 준비 완료")
+                log.info("DB & ES 준비 완료")
                 break
             except Exception as e:
-                print(f"연결 대기 중... ({attempt + 1}/10): {e}")
+                # print(f"연결 대기 중... ({attempt + 1}/10): {e}")
+                log.warning(f"연결 대기 중... ({attempt + 1}/10): {e}", extra={"x_error": str(e)})
                 time.sleep(5)
-
+    log.info("Flask 앱 시작", extra={"x_host": Config.HOST, "x_port": Config.PORT})
     app.run(host=Config.HOST, port=Config.PORT, debug=Config.DEBUG)
