@@ -1,5 +1,7 @@
 import pandas as pd
-from sklearn.datasets import load_digits, load_wine, load_breast_cancer
+# 집값예측 load_boston() -> 2023년 폐지됨 인종차별적 데이터가 있다하여 공식 제거
+# 캘리포이나 집 예측
+from sklearn.datasets import load_digits, load_wine, load_breast_cancer, load_iris
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import accuracy_score
@@ -74,18 +76,71 @@ def 와인등급분류():
     # 1. 데이터 불러오기
     data_load = load_wine()  # 제공한 기능에 어떤 속성 메서드가 있는지 모르겠다.
     X = data_load.data  # 알코올, 산도 등 13가지 성분
-    y = data_load.___________  # 정답 (0, 1, 2 등급)
+    y = data_load.target  # 정답 (0, 1, 2 등급)
 
     # 2. 학습용 / 테스트용 나누기 (전체 178개 → train 142 / test 36)
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=___, random_state=42)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
     # 3. 모델 생성 & 학습
-    model = KNeighborsClassifier(n_neighbors=___)
-    model.___________(X_train, y_train)
+    model = KNeighborsClassifier(n_neighbors=3) #
+    model.fit(X_train, y_train)
 
     # 4. 예측 & 정확도
-    y_pred = model.___________(X_test)
+    y_pred = model.predict(X_test)
     acc = accuracy_score(y_test, y_pred)
     print(f"정확도 : {acc * 100:.1f}%")  # 약 70~75% 나오면 성공
 
-# 와인등급분류()
+#와인등급분류()
+
+def 유방암분류():
+    # 1. 데이터 불러오기
+    data_load = load_breast_cancer()
+    X = data_load.data  # 종양 크기, 모양 등 30가지 수치
+    y = data_load.target  # 정답 (0: 악성, 1: 양성)
+
+    # 2. 학습용 / 테스트용 나누기 (전체 569개 → train 455 / test 114)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=65)
+
+    # 3. 모델 생성 & 학습
+    """
+    3이 딱히 정답은 아니나 관례상 3이나 5를 많이 사용
+    
+    n_neighbors=1   →  제일 가까운 1개만 보고 결정 / 너무 단순해서 틀릴 가능성 높음
+    n_neighbors=3   →  3개 다수결 / 무난하게 잘 맞춤
+    n_neighbors=5   →  5개 다수결 / 더 신중하게 결정
+    n_neighbors=100 →  너무 많이봐서 오히려 정확도 떨어진다.
+    ...    
+    """
+    model = KNeighborsClassifier(n_neighbors=3) # 관례상 3이나 5을 많이 사용
+    model.fit(X_train, y_train)
+
+    # 4. 예측 & 정확도
+    y_pred = model.predict(X_test)
+    acc = accuracy_score(y_test, y_pred)
+    print(f"정확도 : {acc * 100:.1f}%")  # 약 94~96% 나오면 성공
+
+# 유방암분류()
+
+def 붓꽃데이터_csv_저장하기():
+    붓꽃 = load_iris()
+
+    df = pd.DataFrame(붓꽃.data, columns=붓꽃.feature_names)
+    df['정답'] = 붓꽃.target
+    df['정답이름'] = df['정답'].map({
+        0: 'setosa',
+        1: 'versicolor',
+        2: 'verginica',
+    })
+    # index = False 맨 왼쪽에 0~3 번호 저장 안함
+    df.to_csv("붓꽃.csv", index=False, encoding='utf-8-sig')
+    print("저장완료")
+
+붓꽃데이터_csv_저장하기()
+
+
+
+
+
+
+
+
