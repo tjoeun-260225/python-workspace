@@ -99,7 +99,12 @@ print(dir(붓꽃))  # ['DESCR', 'data', 'data_module', 'feature_names', 'filenam
 # 2. 학습용 / 테스트용 나누기 (8:2)
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
+
 # 3. 모델 선텍 & 학습
+# KNeighbors 시리즈는 1951년에 발표된 논문을 중점으로 만들어진 모델
+# 머신러닝을 시작하고 싶은 신입 개발자들에게
+# 모델 분류를 해볼 수 있는 데이터(iris)와 KNeighbors 처럼 만들어놓은 ai 모델을 제공하여
+# 머신러닝의 학습을 공부할 수 있도록 데이터와 모델 제공
 model = KNeighborsClassifier(n_neighbors=3)  # KNN : 가까운 이웃 3개로 판단
 model.fit(X_train, y_train)                     # 학습
 
