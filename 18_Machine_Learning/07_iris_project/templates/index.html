@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>붓꽃 분류기</title>
+</head>
+<body>
+<h1>붓꽃 종류 예측</h1>
+
+<form action="/predict" method="POST">
+    <p>꽃받침 길이 : <input type="text" name="꽃받침길이" placeholder="예: 5.1"></p>
+    <p>꽃받침 너비 : <input type="text" name="꽃받침너비" placeholder="예: 3.5"></p>
+    <p>꽃잎 길이   : <input type="text" name="꽃잎길이"   placeholder="예: 1.4"></p>
+    <p>꽃잎 너비   : <input type="text" name="꽃잎너비"   placeholder="예: 0.2"></p>
+    <button type="submit">예측하기</button>
+</form>
+
+{% if 결과 %}
+<h2>예측 결과 : {{ 결과 }}</h2>
+{% endif %}
+</body>
+</html>
