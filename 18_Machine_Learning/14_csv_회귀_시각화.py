@@ -38,3 +38,6 @@ plt.title("기온에 따른 아이스크림 판매량 예측")
 plt.legend()
 plt.tight_layout()
 plt.show()
+
+"csv 파일 가져와서 회귀 확인 "
+
