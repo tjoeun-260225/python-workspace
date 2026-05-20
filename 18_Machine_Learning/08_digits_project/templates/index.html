@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>손글씨 숫자 예측</title>
+    <style>
+        body {text-align: center; padding: 50px; }
+        .grid {
+            display: inline-grid;
+            grid-template-columns: repeat(8, 40px);
+            gap: 2px;
+            margin: 20px auto;
+        }
+        .cell {
+            width: 40px;
+            height: 40px;
+            background: white;
+            border: 1px solid #ccc;
+            cursor: pointer;
+        }
+        .cell.on { background: black; }
+
+        button {
+            margin: 10px;
+            padding: 10px 30px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .result {
+            font-size: 60px;
+            font-weight: bold;
+            color: blue;
+            margin: 20px;
+        }
+    </style>
+</head>
+<body>
+<h1>손글씨 숫자 예측</h1>
+<p>칸을 클릭해서 숫자를 그려보세요 (8x8)</p>
+<div class="grid" id="grid"></div>
+
+<br>
+<button onclick="예측하기()">예측하기</button>
+<button onclick="초기화()">초기화</button>
+
+{% if 결과 is not none %}
+<div class="result">예측 결과 : {{ 결과 }}</div>
+{% endif %}
+<form id="폼" action="/predict" method="POST">
+    <input type="hidden" name="pixels" id="pixels">
+</form>
+
+<script>
+    const grid = document.getElementById('grid');
+    const cells = [];
+
+    for (let i = 0; i < 64; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        cell.addEventListener('click', () => {
+            cell.classList.toggle('on');
+        });
+        grid.appendChild(cell);
+        cells.push(cell);
+    }
+
+    function 예측하기() {
+        const values = cells.map(c => c.classList.contains('on') ? 16 : 0);
+        document.getElementById('pixels').value = values.join(',');
+        document.getElementById('폼').submit();
+    }
+
+    function 초기화() {
+        cells.forEach(c => c.classList.remove('on'));
+    }
+</script>
+</body>
+</html>

@@ -13,7 +13,7 @@
     <p>꽃잎 너비   : <input type="text" name="꽃잎너비"   placeholder="예: 0.2"></p>
     <button type="submit">예측하기</button>
 </form>
-
+<!-- if 결과 = 0  = False 로 처리되어 결과가 보이지 않는 이슈 발생-->
 {% if 결과 %}
 <h2>예측 결과 : {{ 결과 }}</h2>
 {% endif %}
