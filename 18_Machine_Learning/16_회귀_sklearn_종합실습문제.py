@@ -36,11 +36,11 @@ def 광고모델():
     plt.tight_layout()
     plt.show()
 
-    with open('ad_model.pkl', 'wb') as f:
+    with open('models/ad_model.pkl', 'wb') as f:
         pickle.dump(model, f)
     print("ad_model.pkl 저장 완료!")
 
-    with open('ad_model.pkl', 'rb') as f:
+    with open('models/ad_model.pkl', 'rb') as f:
         loaded_model = pickle.load(f)
 
     result = loaded_model.predict([[300]])
