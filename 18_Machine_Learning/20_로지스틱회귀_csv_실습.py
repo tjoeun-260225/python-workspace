@@ -189,9 +189,39 @@ def churn_dataset():
 # TfidfVectorizer  문자메세지는 단순히 LabelEncoder 로 가볍게 변경할 데이터가 아니다.
 # LabelEncoder    = 카테고리
 # TfidfVectorizer = 문장/문단 (긴 텍스트)
+# spam v3 v4 v5 모두 빈값으로 필요없는 컬럼을 들고 다닐 이유가 없다.
+# TfidfVectorizer  문자메세지는 단순히 LabelEncoder 로 가볍게 변경할 데이터가 아니다.
+# LabelEncoder    = 카테고리
+# TfidfVectorizer = 문장/문단 (긴 텍스트)
 def spam_dataset():
     df = pd.read_csv("csvs/spam.csv", encoding="latin-1")
-    데이터분석(df, "spam")
+
+    # TODO 1. 필요한 컬럼만 선택하고 이름 바꾸기
+    # 힌트 : spam.csv 는 컬럼이 v1, v2, v3... 으로 되어 있다
+    #        v1 = label(spam/ham), v2 = 문자 내용
+    #        필요한 건 v1, v2 두 개뿐
+    df = df[["___", "___"]]
+    df.columns = ["label", "message"]
+
+    데이터분석(df, "label")
+
+    # TODO 2. TF-IDF 로 문자 → 숫자 변환
+    # 힌트 : 문자 데이터는 LabelEncoder 대신 TfidfVectorizer 사용
+    #        단어를 숫자로 바꿔주는 도구
+    from sklearn.feature_extraction.text import TfidfVectorizer
+    tfidf = TfidfVectorizer(max_features=1000)
+    X = tfidf.fit_transform(df["___"])
+
+    # TODO 3. y 만들기
+    # 힌트 : spam 이면 1, ham 이면 0 으로 바뀜
+    y = (df["label"] == "___").astype(int)
+
+    # TODO 4. 훈련/시험 나누기 + 학습 + 결과 출력
+    X_train, X_test, y_train, y_test = train_test_split(___, ___, test_size=0.2, random_state=42)
+    model = LogisticRegression(max_iter=___)
+    model.fit(___, ___)
+    print(f"정확도 : {model.score(___, ___)}")
+    print(classification_report(___, model.predict(___)))
 
 
 # fraud
@@ -202,9 +232,37 @@ def spam_dataset():
 # 그래서 -3 ~ -3 범위로 숫자 범위 맞춰줌
 # 키(cm) vs 몸무게(kg) 단위가 달라 비교 못함
 # 표준화하여 공평하게 비교
+# fraud
+# 컬럼마다 숫자 크기가 중구난방
+# Amount    :  0 ~ 25,000 엄청 큼
+# v1 ~ v28 :  -3 ~ -3     엄청 작음
+# 위와 같을 경우 큰 숫자가 결과를 독차지하고 작은 컬럼은 무시됨
+# 그래서 -3 ~ -3 범위로 숫자 범위 맞춰줌
+# 키(cm) vs 몸무게(kg) 단위가 달라 비교 못함
+# 표준화하여 공평하게 비교
 def fraud_dataset():
     df = pd.read_csv("csvs/fraud.csv")
-    데이터분석(df, "fraud")
+    데이터분석(df, "Class")
+
+    # TODO 1. X, y 나누기
+    # 힌트 : target 컬럼 이름 "Class"
+    X = df.drop("___", axis=1)
+    y = df["___"]
+
+    # TODO 2. StandardScaler 로 스케일링
+    # 힌트 : fraud 는 숫자 컬럼만 있어서 LabelEncoder 필요 없다
+    #        대신 숫자 크기가 너무 달라서 StandardScaler 로 맞춰줘야 한다
+    #        (예: Amount 는 크고 V1~V28 은 작다)
+    from sklearn.preprocessing import StandardScaler
+    scaler = StandardScaler()
+    X = scaler.fit_transform(___)
+
+    # TODO 3. 훈련/시험 나누기 + 학습 + 결과 출력
+    X_train, X_test, y_train, y_test = train_test_split(___, ___, test_size=0.2, random_state=42)
+    model = LogisticRegression(max_iter=___)
+    model.fit(___, ___)
+    print(f"정확도 : {model.score(___, ___)}")
+    print(classification_report(___, model.predict(___)))
 
 
 loan_dataset()
