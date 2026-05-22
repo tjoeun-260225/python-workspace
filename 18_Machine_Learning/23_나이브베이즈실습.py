@@ -152,7 +152,8 @@ def API_CSV_데이터수집():
 # 1. API key setting
 # ==========================
 API_KEY = '6fae13d2'
-
+영화목록 = ["Inception", "Titanic"]
+data = []
 
 def get_movie(title):
     #      http://www.omdbapi.com/?t=Avatar
@@ -190,9 +191,6 @@ def get_movie(title):
     #  json 데이터 갖고오기
 
 
-영화목록 = ["Inception", "Titanic"]
-
-data = []
 
 def csv_저장하기():
     for 제목 in 영화목록:
@@ -214,4 +212,71 @@ def csv_저장하기():
     print(f"\n 총 {len(df)}개 저장완료")
     print(df.head())
 
+
+def 라벨만들기(df):
+    df['label'] = df['rating'].astype(float).apply(
+        lambda x: 'good' if x >= 8.0 else 'bad'
+    )
+    print(df[['title', 'rating', 'label']])
+    return df
+
+
+# ================================
+# csv_불러오기()
+# df['컬럼이름']
+# ================================
+def csv_불러오기():
+    df = pd.read_csv("csvs/omdb_movies.csv")
+    print('상위 5개 데이터 확인 : ', df.head())
+    print('특정 컬럼 조회 : ', df['rating'])
+    return df
+
+
+# ================================
+# 나이브 베이즈 학습
+# ================================
+def 나이브베이즈_학습(df):
+    X = df['plot']
+    y = df['label']
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    vectorizer = CountVectorizer()
+    X_train_vec = vectorizer.fit_transform(X_train)
+    X_test_vec = vectorizer.transform(X_test)
+
+    model = MultinomialNB()
+    model.fit(X_train_vec, y_train)
+
+    print(f"정확도: {model.score(X_test_vec, y_test):.4f}")
+    return model, vectorizer
+
+
+# ================================
+# 직접 예측
+# ================================
+def 직접예측(model, vectorizer):
+    my_plots = [
+        "A thief who enters dreams to steal secrets",
+        "A boring love story with no action or excitement",
+    ]
+    my_vec = vectorizer.transform(my_plots)
+    result = model.predict(my_vec)
+
+    print(f"줄거리1 예측: {result[0]}")  # → good
+    print(f"줄거리2 예측: {result[1]}")  # → bad
+
+
+# ================================
+# 실행
+# ================================
 csv_저장하기()
+df = csv_불러오기()
+df = 라벨만들기(df)
+model, vectorizer = 나이브베이즈_학습(df)
+직접예측(model, vectorizer)
+
+
+# 1. 우리 회사에서 고객의 의견을 확인하는 모델로 사용
+# 2. 특정영화를 여러 사이트 방문해서 사람들의 인지도가 어떤지 조회 분석
+# 3. 맛집       여러 사이트를 방문해서 특정 지역에서 인지도 좋은 맛집 분석
+# 4. 쇼핑... 논문 등 글자로 무언가를 파악해야할 때 사용
