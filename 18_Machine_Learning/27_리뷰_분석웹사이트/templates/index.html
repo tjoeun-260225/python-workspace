@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>앱 리뷰 감정 분석</title>
+    <style>
+        body { text-align: center; padding: 50px; font-family: sans-serif; }
+
+        textarea {
+            width: 500px;
+            height: 120px;
+            font-size: 16px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            resize: none;
+        }
+        button {
+            display: block;
+            margin: 15px auto;
+            padding: 10px 40px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 8px;
+            background: #4CAF50;
+            color: white;
+        }
+        .result {
+            font-size: 50px;
+            font-weight: bold;
+            margin: 20px;
+        }
+        .positive { color: blue; }
+        .negative { color: red;  }
+        .prob { font-size: 20px; color: gray; }
+    </style>
+</head>
+<body>
+<h1>앱 리뷰 감정 분석</h1>
+<p>리뷰를 입력하면 긍정/부정을 예측합니다</p>
+
+<form action="/predict" method="POST">
+    <textarea name="review" placeholder="리뷰를 입력하세요...">{{ 리뷰 or '' }}</textarea>
+    <button type="submit">분석하기</button>
+</form>
+
+{% if 결과 %}
+<div class="result {{ 결과 }}">
+    {% if 결과 == 'positive' %}😊 긍정{% else %}😞 부정{% endif %}
+</div>
+<div class="prob">확신도: {{ 확률 }}%</div>
+{% endif %}
+
+</body>
+</html>
