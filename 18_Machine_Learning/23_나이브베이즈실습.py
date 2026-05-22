@@ -11,6 +11,7 @@ Fake News 가짜 뉴스 분류 데이터 셋
 """
 
 import pandas as pd
+import requests
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.model_selection import train_test_split
@@ -135,3 +136,82 @@ def csv_영화리뷰():
     result = model.predict(my_vec)
     print(f"리뷰1 예측: {result[0]}")  # → positive
     print(f"리뷰2 예측: {result[1]}")  # → negative
+
+
+def API_CSV_데이터수집():
+    """
+    데이터를 인터넷에서 수집하고 수집한 데이터를 csv 로 저장한다.
+    데이터 수집에서 사용하는 사이트
+    omdbapi.com
+    api key free 발급 받아 사용 가능
+    하루 1000번 무료 호출 가능
+    """
+
+
+# ==========================
+# 1. API key setting
+# ==========================
+API_KEY = '6fae13d2'
+
+
+def get_movie(title):
+    #      http://www.omdbapi.com/?t=Avatar
+    url = f"http://www.omdbapi.com/?t={title}&apikey={API_KEY}"
+    """
+    {"Title":"Avatar",
+    "Year":"2009",
+    "Rated":"PG-13",
+    "Released":"18 Dec 2009",
+    "Runtime":"162 min",
+    "Genre":"Action, Adventure, Fantasy",
+    "Director":"James Cameron",
+    "Writer":"James Cameron",
+    "Actors":"Sam Worthington, Zoe Saldaña, Sigourney Weaver",
+    "Plot":"A paraplegic Marine dispatched to the moon Pandora on a unique mission becomes torn between following his orders and protecting the world he feels is his home.",
+    "Language":"English, Spanish",
+    "Country":"United States, United Kingdom",
+    "Awards":"Won 3 Oscars. 91 wins & 131 nominations total",
+    "Poster":"https://m.media-amazon.com/images/M/MV5BMDEzMmQwZjctZWU2My00MWNlLWE0NjItMDJlYTRlNGJiZjcyXkEyXkFqcGc@._V1_SX300.jpg",
+    "Ratings":[{"Source":"Internet Movie Database","Value":"7.9/10"},{"Source":"Rotten Tomatoes","Value":"81%"},{"Source":"Metacritic","Value":"83/100"}],
+    "Metascore":"83",
+    "imdbRating":"7.9",
+    "imdbVotes":"1,486,308",
+    "imdbID":"tt0499549",
+    "Type":"movie",
+    "DVD":"N/A",
+    "BoxOffice":"$785,221,649",
+    "Production":"N/A",
+    "Website":"N/A",
+    "Response":"True"}
+    
+    """
+    response = requests.get(url)
+    return response.json()  # omdbapi 접속해서 해당 제목의 영화 데이터 영화데이터 접근 권한 = api key  이용해서
+    #  json 데이터 갖고오기
+
+
+영화목록 = ["Inception", "Titanic"]
+
+data = []
+
+def csv_저장하기():
+    for 제목 in 영화목록:
+        영화사이트_데이터 = get_movie(제목)  # 위에서 만들어준 get_movie 기능에 제목을 하나씩 전달하여 검색하기 기능
+
+        if 영화사이트_데이터.get("Response") == "True":
+            data.append({
+                "title": 영화사이트_데이터.get("Title"),
+                "year": 영화사이트_데이터.get("Year"),
+                "genre": 영화사이트_데이터.get("Genre"),
+                "plot": 영화사이트_데이터.get("Plot"),
+                "rating": 영화사이트_데이터.get("imdbRating"),
+                "awards": 영화사이트_데이터.get("Awards"),
+            })
+            print(f"수집완료 : {제목}")
+
+    df = pd.DataFrame(data)
+    df.to_csv("csvs/omdb_movies.csv", index=False, encoding="utf-8-sig")
+    print(f"\n 총 {len(df)}개 저장완료")
+    print(df.head())
+
+csv_저장하기()
