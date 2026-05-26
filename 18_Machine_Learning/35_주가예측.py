@@ -12,9 +12,7 @@ from sklearn.metrics import accuracy_score, classification_report
 
 def 주식예측():
 
-    # TODO 1: CSV 파일 읽기
-    # 힌트: pd.read_csv("파일명.csv")
-    df = ___
+    df = pd.read_csv("csvs/stock_data.csv")
 
     print("=== 데이터 미리보기 ===")
     print(df.head())
@@ -25,109 +23,133 @@ def 주식예측():
     print("\n=== 몇 행 몇 열? ===")
     print(df.shape)
 
-    # ★ 주식은 정답 컬럼이 없어서 직접 만들어야 한다.
-    # 오늘 종가(Close) > 시가(Open) 이면 상승(1), 아니면 하락(0)
-    # 힌트: (df['Close'] > df['Open']) 은 True/False 반환
-    # 힌트: .astype(int) 붙이면 True=1, False=0 으로 바뀜
-    # TODO 2: 정답 컬럼 Target 만들기
-    df['Target'] = ___
+    df['Target'] = (df['Close'] > df['Open']).astype(int)
 
     print(f"\n상승일 수 : {df['Target'].sum()}일")
     print(f"하락일 수 : {(df['Target'] == 0).sum()}일")
 
-    # TODO 3: 결측치(빈값) 채우기
-    # 힌트: df['Open'].fillna(df['Open'].mean()) 이런 식으로
-    # 힌트: isnull().sum() 에서 0 아닌 컬럼만 처리
-    df['Open']   = ___
-    df['High']   = ___
-    df['Low']    = ___
-    df['Volume'] = ___
+    df['Open']   = df['Open'].fillna(df['Open'].mean())
+    df['High']   = df['High'].fillna(df['High'].mean())
+    df['Low']    = df['Low'].fillna(df['Low'].mean())
+    df['Volume'] = df['Volume'].fillna(df['Volume'].mean())
 
-    # TODO 4: 사용할 피처(컬럼) 리스트 채우기
-    # 힌트: 정답(Target), 날짜(Date) 빼고 숫자 컬럼 다 넣기
-    # 힌트: features = ['Open', 'High', ___, ___]
-    features = [___, ___, ___, ___]
+    features = ['Open', 'High', 'Low', 'Volume']
 
-    # TODO 5: X (입력), y (정답) 나누기
-    # 힌트: X = df[features]
-    # 힌트: y = df['Target']   ← 상승=1, 하락=0
-    X = ___
-    y = ___
+    X = df[features]
+    y = df['Target']
 
-    # TODO 6: 훈련/테스트 데이터 나누기
-    # 힌트: train_test_split(X, y, test_size=0.2, random_state=42)
-    # 힌트: 반환값 4개 → X_train, X_test, y_train, y_test
-    X_train, X_test, y_train, y_test = ___
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-    # TODO 7: 랜덤포레스트 모델 만들기
-    # 힌트: RandomForestClassifier(n_estimators=100, max_features='sqrt', random_state=42)
-    rf = ___
-
-    # TODO 8: 모델 학습시키기
-    # 힌트: rf.fit(___, ___)  ← 훈련 데이터 넣기
-    ___.fit(___, ___)
-
-    # TODO 9: 테스트 데이터로 예측하기
-    # 힌트: rf.predict(___)  ← 테스트 입력 넣기
-    pred_rf = ___
+    rf = RandomForestClassifier(n_estimators=100, max_features='sqrt', random_state=42)
+    rf.fit(X_train, y_train)
+    pred_rf = rf.predict(X_test)
 
     print("\n=== 랜덤 포레스트 결과 ===")
     print(f"정확도 : {accuracy_score(y_test, pred_rf):.4f}")
     print(classification_report(y_test, pred_rf, target_names=['하락', '상승']))
 
-    # =======================================
-    # VotingClassifier (3개 모델이 투표!)
-    # 상승 / 하락 / 상승  → 다수결 → 상승 승리
-    # =======================================
+    model1 = RandomForestClassifier(n_estimators=100, random_state=42)
+    model2 = DecisionTreeClassifier(random_state=42)
+    model3 = LogisticRegression(max_iter=1000, random_state=42)
 
-    # TODO 10: 3개 모델 각각 만들기
-    # 힌트: RandomForestClassifier(n_estimators=100, random_state=42)
-    # 힌트: DecisionTreeClassifier(random_state=42)
-    # 힌트: LogisticRegression(max_iter=1000, random_state=42)
-    model1 = ___   # 랜덤포레스트
-    model2 = ___   # 결정트리
-    model3 = ___   # 로지스틱회귀
-
-    # TODO 11: VotingClassifier 만들기
-    # 힌트: estimators=[('rf', model1), ('dt', model2), ('lr', model3)]
-    # 힌트: voting='hard'  ← 다수결 투표
     voting = VotingClassifier(
-        estimators=[('rf', ___), ('dt', ___), ('lr', ___)],
-        voting=___
+        estimators=[('rf', model1), ('dt', model2), ('lr', model3)],
+        voting='hard'
     )
-
-    # TODO 12: voting 모델 학습시키기
-    # 힌트: TODO 8 이랑 똑같이, rf 대신 voting 넣기
-    ___.fit(___, ___)
-
-    # TODO 13: voting 모델로 예측하기
-    # 힌트: TODO 9 이랑 똑같이, rf 대신 voting 넣기
-    pred_voting = ___
+    voting.fit(X_train, y_train)
+    pred_voting = voting.predict(X_test)
 
     print("\n=== 보팅 결과 (3개 모델 투표) ===")
     print(f"정확도 : {accuracy_score(y_test, pred_voting):.4f}")
     print(classification_report(y_test, pred_voting, target_names=['하락', '상승']))
 
-    # TODO 14: 랜덤포레스트 vs 보팅 정확도 비교 출력
-    # 힌트: accuracy_score(y_test, pred_rf) 랑 accuracy_score(y_test, pred_voting) 비교
     print("\n=== 모델 비교 ===")
-    print(f"랜덤포레스트 정확도 : {accuracy_score(y_test, ___): .4f}")
-    print(f"보팅        정확도 : {accuracy_score(y_test, ___): .4f}")
+    print(f"랜덤포레스트 정확도 : {accuracy_score(y_test, pred_rf): .4f}")
+    print(f"보팅        정확도 : {accuracy_score(y_test, pred_voting): .4f}")
     if accuracy_score(y_test, pred_voting) > accuracy_score(y_test, pred_rf):
         print("보팅이 더 좋다.")
     else:
         print("랜덤포레스트가 더 좋다.")
 
-    # TODO 15: 피처 중요도 출력
-    # 힌트: 학습된 rf 모델에서 rf.feature_importances_ 로 꺼냄
-    # 힌트: pd.DataFrame({'특성': features, '중요도': ___})
-    # 힌트: .sort_values('중요도', ascending=False) 높은 순 정렬
     중요도 = pd.DataFrame({
         '특성': features,
-        '중요도': ___
-    }).sort_values(___, ascending=___)
+        '중요도': rf.feature_importances_
+    }).sort_values('중요도', ascending=False)
 
     print("\n=== 주가 예측에 영향주는 요소 순위 ===")
     print(중요도)
 
 주식예측()
+
+"""
+=== 데이터 미리보기 ===
+       Open     Close      High  ...  GDP_Growth  Inflation_Rate  Target
+0  0.374639  0.374780  0.373510  ...    0.580868        0.038604       0
+1  0.950982  0.937746  0.938422  ...    0.527044        0.108908       0
+2  0.732198  0.719825  0.723644  ...    0.351052        0.432540       0
+3  0.598823  0.599865  0.596973  ...    0.493274        0.946349       0
+4  0.156053  0.163410  0.155891  ...    0.365116        0.074867       0
+
+[5 rows x 13 columns]
+
+=== 컬럼 목록 ===
+['Open', 'Close', 'High', 'Low', 'Volume', 'RSI', 'MACD', 'Bollinger_Upper', 'Bollinger_Lower', 'Sentiment_Score', 'GDP_Growth', 'Inflation_Rate', 'Target']
+
+=== 결측치 확인 ===
+Open               0
+Close              0
+High               0
+Low                0
+Volume             0
+RSI                0
+MACD               0
+Bollinger_Upper    0
+Bollinger_Lower    0
+Sentiment_Score    0
+GDP_Growth         0
+Inflation_Rate     0
+Target             0
+dtype: int64
+
+=== 몇 행 몇 열? ===
+(10000, 13)
+
+상승일 수 : 5307일
+하락일 수 : 4693일
+
+=== 랜덤 포레스트 결과 ===
+정확도 : 0.8790
+              precision    recall  f1-score   support
+
+          하락       0.86      0.88      0.87       929
+          상승       0.90      0.87      0.89      1071
+
+    accuracy                           0.88      2000
+   macro avg       0.88      0.88      0.88      2000
+weighted avg       0.88      0.88      0.88      2000
+
+
+=== 보팅 결과 (3개 모델 투표) ===
+정확도 : 0.8690
+              precision    recall  f1-score   support
+
+          하락       0.85      0.87      0.86       929
+          상승       0.88      0.87      0.88      1071
+
+    accuracy                           0.87      2000
+   macro avg       0.87      0.87      0.87      2000
+weighted avg       0.87      0.87      0.87      2000
+
+
+=== 모델 비교 ===
+랜덤포레스트 정확도 :  0.8790
+보팅        정확도 :  0.8690
+랜덤포레스트가 더 좋다.
+
+=== 주가 예측에 영향주는 요소 순위 ===
+       특성       중요도
+0    Open  0.399154
+1    High  0.269184
+2     Low  0.241303
+3  Volume  0.090359
+"""
