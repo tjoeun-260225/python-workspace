@@ -118,7 +118,7 @@ def 하드_소프트_투표기능():
 
     # 개별 모델별 어떻게 정확도가 나왔는지도 몹시 궁급하네요 ^^
     # 학습 & 평가 version2 = 로지스틱 / 결정 트리 / KNN 각 확률이나 비율이 어떻게 나왔는가
-    for 이름, 모델 in [('lr', 로지스틱모델), ('dt', 결정트리모델), ('knn', KNN모델)],:
+    for 이름, 모델 in [('lr', 로지스틱모델), ('dt', 결정트리모델), ('knn', KNN모델)]:
         모델.fit(X_train, y_train)
         결과 = 모델.predict(X_test)
         print(f"{이름} 정확도 : {accuracy_score(y_test, 결과):.4f}")
