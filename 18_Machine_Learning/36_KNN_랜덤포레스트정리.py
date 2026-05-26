@@ -68,6 +68,7 @@ import os
 from sklearn.neighbors import KNeighborsClassifier
 
 model = KNeighborsClassifier(n_neighbors=3)  # 기본값으로 3 또는 5
+# weights metric p algorithm n_jobs 와 같은 속성 존재
 model.fit('X_train', "y_train")
 model.predict("X_test")
 
@@ -77,6 +78,7 @@ model.predict("X_test")
 from sklearn.linear_model import LinearRegression
 
 model = LinearRegression()
+# fit_intercept, n_jobs
 model.fit('X_train', "y_train")
 model.predict("X_test")
 
