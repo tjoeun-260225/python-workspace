@@ -76,8 +76,6 @@ def Voting기능설명():
     투표_1.fit(X_train, y_train)
     결과 = 투표_1.predict(X_test)
     print(f"하드 보팅 정확도 : {accuracy_score(y_test, 결과):.4f}")
-
-
 def 하드투표기능():
     하드투표 = VotingClassifier(
         estimators=[('lr', 로지스틱모델), ('dt', 결정트리모델), ('knn', KNN모델)],
@@ -86,8 +84,6 @@ def 하드투표기능():
     하드투표.fit(X_train, y_train)
     결과 = 하드투표.predict(X_test)
     print(f"하드 보팅 정확도 : {accuracy_score(y_test, 결과):.4f}")
-
-
 def 소프트투표기능():
     소프트투표 = VotingClassifier(
         estimators=[('lr', 로지스틱모델), ('dt', 결정트리모델), ('knn', KNN모델)],
@@ -96,11 +92,8 @@ def 소프트투표기능():
     소프트투표.fit(X_train, y_train)
     결과 = 소프트투표.predict(X_test)
     print(f"소프트 보팅 정확도 : {accuracy_score(y_test, 결과):.4f}")
-
-
 # 하드 투표 같이 사용 가능? ok 가능
 # for 문이용해서 하면 된다.
-
 def 하드_소프트_투표기능():
     하드투표 = VotingClassifier(
         estimators=[('lr', 로지스틱모델), ('dt', 결정트리모델), ('knn', KNN모델)],
@@ -123,10 +116,20 @@ def 하드_소프트_투표기능():
         결과 = 모델.predict(X_test)
         print(f"{이름} 정확도 : {accuracy_score(y_test, 결과):.4f}")
 
+# 2. 랜덤포레스트(Random Forest)
+#    보팅은 다른 종류의 모델을 합쳐서 결과를 하나로 확인하지만
+#    랜덤포레스트는 같은 결정트리를 여러 개 만들어서 합친다
+#    각 트리를 다르게 만들기 위해 두 가지 무작위성을 사용
 
-print("=" * 20, "하드 투표", "=" * 20)
-하드투표기능()
-print("=" * 20, "소프트 투표", "=" * 20)
-소프트투표기능()
-print("=" * 20, "하드 소프트 투표기능", "=" * 20)
-하드_소프트_투표기능()
+## * 결정트리(Decision Tree)
+##   스무고개 방식으로 데이터 분류
+##   질문을 던지고 → Yes / No 나누고 → 또 질문 반복해서 → 최종 답을 낸다.
+##   질문을 너무 깊게 파고들면 훈련 데이터를 통째로 외우기만하고, 새로운 데이터 약하다.
+
+
+
+
+
+
+
+

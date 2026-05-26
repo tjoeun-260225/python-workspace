@@ -10,7 +10,7 @@ plt.rcParams['font.family'] = 'Malgun Gothic'
 plt.rcParams['axes.unicode_minus'] = False
 
 def 광고모델():
-    df = pd.read_csv('csvs/ad_sales.csv')
+    df = pd.read_csv('../csvs/ad_sales.csv')
     X = df[['광고비용(만원)']]
     y = df['매출액(만원)']
 
@@ -36,11 +36,11 @@ def 광고모델():
     plt.tight_layout()
     plt.show()
 
-    with open('models/ad_model.pkl', 'wb') as f:
+    with open('../models/ad_model.pkl', 'wb') as f:
         pickle.dump(model, f)
     print("ad_model.pkl 저장 완료!")
 
-    with open('models/ad_model.pkl', 'rb') as f:
+    with open('../models/ad_model.pkl', 'rb') as f:
         loaded_model = pickle.load(f)
 
     result = loaded_model.predict([[300]])

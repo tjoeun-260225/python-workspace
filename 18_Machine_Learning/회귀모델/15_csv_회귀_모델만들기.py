@@ -7,7 +7,7 @@ from sklearn.metrics import mean_squared_error, r2_score
 
 
 def 아이스크림_판매량_모델만들기():
-    df = pd.read_csv('csvs/icecream_sales.csv')
+    df = pd.read_csv('../csvs/icecream_sales.csv')
     X = df[['기온']]
     y = df['판매량']
 
@@ -27,7 +27,7 @@ def 아이스크림_판매량_모델만들기():
 
 
 def 운동칼로리_모델만들기():
-    df = pd.read_csv('csvs/exercise_calories.csv')
+    df = pd.read_csv('../csvs/exercise_calories.csv')
     X = df[['운동시간(분)']]
     y = df['칼로리소모']
 
@@ -48,7 +48,7 @@ def 운동칼로리_모델만들기():
 
 
 def 광고매출_모델만들기():
-    df = pd.read_csv('csvs/ad_sales.csv')
+    df = pd.read_csv('../csvs/ad_sales.csv')
     X = df[['광고비용(만원)']]
     y = df['매출액(만원)']
 

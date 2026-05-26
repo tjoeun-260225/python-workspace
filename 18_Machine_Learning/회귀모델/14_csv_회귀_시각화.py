@@ -10,7 +10,7 @@ plt.rcParams['font.family'] = 'Malgun Gothic'
 plt.rcParams['axes.unicode_minus'] = False
 
 # 1. csv 데이터 불러오기
-df = pd.read_csv('csvs/icecream_sales.csv')
+df = pd.read_csv('../csvs/icecream_sales.csv')
 X = df[['기온']]  # 결과가 표 형태로 나옴 sklearn 모델은 X를 표 형태로 무조건 받아야 한다.
 y = df['판매량']  # 결과가 목록 리스트 형태로 나옴 정답같은 경우 하나만 필요하기 때문에 1개
 
