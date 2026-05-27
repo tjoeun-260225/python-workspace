@@ -236,3 +236,18 @@ lbmBoost : 0.8380
 
 
 """
+
+
+# ===========================
+# 5. 가장 좋은 모델로 캐글 제출 파일 만들기
+# ===========================
+test_x = test[컬럼들]
+predictions = lgb_model.predict(test_x)
+
+submission = pd.DataFrame({
+    'PassengerId':test['PassengerId'],
+    'Survived':predictions
+})
+submission.to_csv('csvs/titanic/submission.csv',index=False)
+print(f"캐글 제출 파일 생성 완료 ▶ submission.csv")
+# 나중에 만들어진 submission.csv 파일을 캐글에 업로드
