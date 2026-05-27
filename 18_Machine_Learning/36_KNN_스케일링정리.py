@@ -134,3 +134,76 @@ from sklearn.ensemble import RandomForestClassifier
 model = RandomForestClassifier(n_estimators=100, random_state=42)
 model.fit("X_train", "y_train")
 model.predict("X_test")
+
+# 8. 앙상블 - 부스팅(Boosting)
+# - 모델을 순서대로 만들면서 이전 모델이 틀린 것을 다음 모델이 보완하는 방식
+# - 랜덤포레스트는 동시에 여러 모델을 만들지만, 부스팅은 순서대로 만들어서 틀린 것에 집중
+# - 종류 : AdaBoost, GBM, XGBoost, LightGBM
+#   데이터가 적으면 XGBoost 사용, 데이터가 많으면 LightGBM
+from sklearn.ensemble import AdaBoostClassifier, GradientBoostingClassifier
+# 1. AdaBoost
+ada_model = AdaBoostClassifier(n_estimators=100, random_state=42)
+ada_model.fit("X_train", "y_train")
+print(f"AdaBoost : {ada_model.score("X_test", "y_test"):.4f}")
+
+# 2. GBM
+gbm_model = GradientBoostingClassifier(n_estimators=100, random_state=42)
+gbm_model.fit("X_train", "y_train")
+print(f"GBM      : {gbm_model.score("X_test", "y_test"):.4f}")
+
+# 3. XGBoost
+import xgboost as xgb  # xgboost 너무 길어서 xgb 줄여서 사용
+xgb_model = xgb.XGBClassifier(n_estimators=100, eval_metric='logloss', random_state=42)
+xgb_model.fit("X_train", "y_train")
+print(f"XGBoost  : {xgb_model.score("X_test", "y_test"):.4f}")
+
+# 4. LightGBM
+import lightgbm as lgb  # lightgbm 너무 길어서 lgb 줄여서 사용
+lgb_model = lgb.LGBMClassifier(n_estimators=100, random_state=42)
+lgb_model.fit("X_train", "y_train")
+print(f"LightGBM : {lgb_model.score("X_test", "y_test"):.4f}")
+
+# 9. 앙상블 - 스태킹(Stacking)
+# - 여러 모델의 예측값을 새로운 입력으로 사용해서 메타 모델이 최종 학습하는 방식
+# - 보팅이 다수결로 결정한다면, 스태킹은 모델들의 예측 결과를 보고 최종 판단하는
+#   심사위원장 모델을 두는 것
+
+"""
+현재 배운 모델 기준으로 상황에 따른 모델 사용 방법
+- 가볍게 숫자       예측           → 선형 회귀
+- 텍   스  트       분류           → 나이브 베이즈
+- 일반 분류, 빠르게 시작           →  KNN, 로지스틱 회귀
+- 정확도를 더 높이고 싶다          → 랜덤 포레스트
+- 여러 모델 결과를 합쳐서 보고싶다 → 보팅
+- 더 높은 성능이 필요하다          → XGBoost, LightGBM
+- 성능을 극한까지 끌어올리고 싶다  → 스테킹
+
+모델들의 옵션같은 존재
+- 스케일링 : 컬럼별 숫자 범위차이가 너무 난다. 범위를 비슷하게 맞추자
+나이 20~90 연봉 1000000 ~ 90000000
+나이와 연봉의 숫자 갭이 너무 크다.
+스케일링 모델을 사용해서      20 ~ 90       범위 를   0~1 사이로 정리
+                         1000000 ~ 90000000 범위 또한 0~1 사이로 정리
+- 가중치(weight) : 중요도 영향력 각 피처가 얼마나 중요한지의 숫자
+- 피처(Feature)  : 입력 데이터의 열
+피처는 무엇을 가중치는 얼마나
+
+1번 모델이 이 데이터 정답을 틀렸네?
+어 이모델좀 봐 봐라
+2번 모델은 okok 저 봐야하는 모델 을 좀 더 학습할게
+어 이번엔 또 틀렸고 다른 것도 틀렸어
+3번 모델 okok 가중치 좀 더 주고 다시 학습할게
+정답을 틀린 데이터에 중요하니 다음엔 꼭 맞추자 표기한 것
+
+머신러닝 - 모델 내에 수학적 계산을 사용하여 모델을 만들어내지만
+딥러닝의 경우 개발자가 수학적 계산을 하여 모델을 만들어낸다.
+"""
+
+
+
+
+
+
+
+
+
