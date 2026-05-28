@@ -53,7 +53,7 @@ def csv_영화리뷰():
     # ================================
     # 1. 데이터 불러오기
     # ================================
-    df = pd.read_csv("csvs/IMDB_Dataset.csv")
+    df = pd.read_csv("../csvs/IMDB_Dataset.csv")
 
     # TODO 1: 데이터 상위 5개 출력해보기
     print(df.head())
@@ -226,7 +226,7 @@ def 라벨만들기(df):
 # df['컬럼이름']
 # ================================
 def csv_불러오기():
-    df = pd.read_csv("csvs/omdb_movies.csv")
+    df = pd.read_csv("../csvs/omdb_movies.csv")
     print('상위 5개 데이터 확인 : ', df.head())
     print('특정 컬럼 조회 : ', df['rating'])
     return df

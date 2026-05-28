@@ -12,7 +12,7 @@ from sklearn.metrics import accuracy_score, classification_report
 
 
 def 고객이탈예측():
-    df = pd.read_csv("csvs/ecommerce_customer_data_custom_ratios.csv")
+    df = pd.read_csv("../csvs/ecommerce_customer_data_custom_ratios.csv")
     print("=== 데이터 미리보기 ===")
     print(df.head())
     print("\n=== 결측치 확인 ===")

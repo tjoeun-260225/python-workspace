@@ -12,7 +12,7 @@ from sklearn.metrics import accuracy_score, classification_report
 
 def 날씨예측():
 
-    df = pd.read_csv("csvs/weather_forecast_data.csv")
+    df = pd.read_csv("../csvs/weather_forecast_data.csv")
 
     print("=== 데이터 미리보기 ===")
     print(df.head())

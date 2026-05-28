@@ -9,7 +9,7 @@ from sklearn.metrics import accuracy_score
 # ================================
 # 1. CSV 불러오기
 # ================================
-df = pd.read_csv("csvs/google_app_review.csv")
+df = pd.read_csv("../csvs/google_app_review.csv")
 print(df.head())
 print(df.shape)
 print(df['rating'].value_counts())

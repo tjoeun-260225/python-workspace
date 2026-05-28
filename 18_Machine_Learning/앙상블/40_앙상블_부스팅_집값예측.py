@@ -10,8 +10,8 @@ from sqlalchemy.dialects.mssql.information_schema import columns
 # 1. 데이터 불러오기
 # ================================
 def load_data():
-    train = pd.read_csv('csvs/house_prices/train.csv')
-    test = pd.read_csv('csvs/house_prices/test.csv')
+    train = pd.read_csv('../csvs/house_prices/train.csv')
+    test = pd.read_csv('../csvs/house_prices/test.csv')
     return train, test
 
 

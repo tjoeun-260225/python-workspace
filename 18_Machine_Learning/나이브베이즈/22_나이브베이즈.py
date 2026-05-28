@@ -96,7 +96,7 @@ def 기초코드문법():
 def csv_기초코드문법():
     # 1. 깔끔하게 정제되어 공부하기 좋은 csv 파일 불러오기
     df = pd.read_csv(
-        "csvs/spam_sms.csv",
+        "../csvs/spam_sms.csv",
         encoding='latin-1',
         usecols=[0, 1]  # usecols = 사용할 컬럼 선택 v1,v2, , ,
         #       v1,v2 컬럼만 사용하겠다.
