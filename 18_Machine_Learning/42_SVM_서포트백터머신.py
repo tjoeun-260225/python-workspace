@@ -43,15 +43,15 @@ SVM
     → 2012년 컴퓨터 성능이 좋아지면서 딥러닝 재등장 이미지/음성은 딥러닝이 압도
       현  재 엑셀같은 표 데이터에서는 적은 데이터로도 잘 작동하여 사용하기도 한다.
 """
-
+from sklearn.metrics import mean_squared_error
 # 데이터가 있는데 데이터 컬럼마다 숫자가 천차만별
 # 나이컬럼 연봉컬럼 자녀수컬럼 부서인원컬럼
 # 0~100     천~억    0~10        0~100 ..
 # 스케일링을 사용해서 각각 컬럼을 -3~3 0~1 와 같이 알아서 스케일링으로
 # 범위를 비슷하게 만들어서 계산 처리를 할 수 있게 세팅해주는 것이
 # 스 케 일 링!
-from sklearn.svm import SVC  # Support Vector Classifier
-from sklearn.datasets import load_iris, make_classification, make_circles
+from sklearn.svm import SVC, SVR  # Support Vector Classifier
+from sklearn.datasets import load_iris, make_classification, make_circles, make_regression
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 
@@ -158,6 +158,31 @@ def 감마종류확인():
         """
 
 
-감마종류확인()
+def 회귀_SVR():
+    X, y = make_regression(n_samples=200,
+                           n_features=1,
+                           noise=20,
+                           random_state=42
+                           )
+    X_train, X_test, y_train, y_test = train_test_split(
+        X,
+        y,
+        test_size=0.2,
+        random_state=42
+    )
+    scaler_X = StandardScaler()
+    scaler_y = StandardScaler()
+    X_train_s = scaler_X.fit_transform(X_train)
+    X_test_s = scaler_X.transform(X_test)
+    y_train_s = scaler_y.fit_transform(y_train.reshape(-1, 1)).ravel()
+    # epsilon = 이 범위 안에 있는 모든 오차는 무시하겠다.
+    svr = SVR(kernel='rbf', C=1.0, epsilon=0.1)
+    svr.fit(X_train_s, y_train_s)
+    pred_s = svr.predict(X_test_s)
+    pred = scaler_y.inverse_transform(pred_s.reshape(-1, 1)).ravel()
+    print(f"SVR MSE :{mean_squared_error(y_test, pred)}")
+    print(f"SVR 예측값(5개) : {pred[:5].round(1)}")
+
+# 감마종류확인()
 # 커널종류확인()
 # 마진확인방법()
