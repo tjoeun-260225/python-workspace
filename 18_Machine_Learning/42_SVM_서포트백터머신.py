@@ -159,30 +159,79 @@ def 감마종류확인():
 
 
 def 회귀_SVR():
+    # 예측용 가짜 데이터 생성
+    # 의미 없는 숫자 1개 컬럼에 200개 의 데이터로 아무 숫자나 뽑아라~
+    # noise = 0 완벽한 직선관계
+    # noise = 20 살짝 흔들린 직선
+    # noise = 100 많이 흔들려서 직선이라 할 수 없다.
     X, y = make_regression(n_samples=200,
                            n_features=1,
                            noise=20,
                            random_state=42
                            )
+    print("X[:5] : ", X[:5])
+    print("y[:5] : ", y[:5])
+    """
+    가짜 데이터를 만들 때 sklearn 자체에서 
+    X 는 -3 ~ 3 사이 데이터로 만들고
+    y 는 -300 ~ 300 사이 데이터를 만들자!
+       가중치와 여러가지 로 인하여 y 가 만들어짐
+       X * 가중치 * noise 와 같은 셈 계산식이 make_regression 에 존재하고
+       계산결과가 y에 담긴 것일 뿐
+    X[:5] : [[ 1.85227818] [ 0.47359243] [-1.23086432] [ 0.62566735] [-0.07201012]]
+    y[:5] : [137.09646394  59.0025564  -76.59207503  60.80391878  -8.88621709]
+    """
+    #위에서 만들어진 가짜 데이터를 훈련용 데이터 정답   정답확용 테스트 20 데이터 정답 분리
     X_train, X_test, y_train, y_test = train_test_split(
         X,
         y,
         test_size=0.2,
         random_state=42
     )
-    scaler_X = StandardScaler()
-    scaler_y = StandardScaler()
-    X_train_s = scaler_X.fit_transform(X_train)
+    # 스케일러를 따로 만드는 이유는
+    # X와 y는 숫자 범위가 완전히 다르다
+    scaler_X = StandardScaler() # -  2 ~   2 사이이거나 -3   ~   3 사이이거나
+    scaler_y = StandardScaler() # -200 ~ 200 사이이거나 -500 ~ 500 사이이거나
+    # 범위 가 다르므로 각각 개별 범위에서 -3~3 사이로 맞추는것
+    # scaler_X = StandardScaler()     -  2 ~   2 숫자들을 -3   ~   3 사이로 변환
+    # scaler_y = StandardScaler()     -200 ~ 200 숫자들을 -500 ~ 500 사이로 변환
+
+    # 데이터를 확인 csv 데이터 수집 데이터 확인
+    # 만약 붓꽃처럼 y가 0 1 2 이미 정제된 숫자라 스케일링 의미가 없다.
+
+    # y 집값 -> 서울 1억 경기도 9억 인천 8억 부산 15억
+    # 숫자가 크면 SVR 계산이 힘들어지므로
+    # 집값 총 숫자 범위를 머신러닝이 확인 후 숫자를 0~1 -3~3 처럼 범위를 제한하여 학습 시킴
+
+    # 본격적으로 데이터 변환 작업 시작
+    # 1. 훈련용 데이터를 -3~3 사이로 변환하겠다. 변환할 데이터 선택
+    X_train_s = scaler_X.fit_transform(X_train) # 학습시킬 데이터셋 정한 후 위에서 선택한 스탠다스스케일로 변환
+    # 2. 훈련이 제대로 되었는지 확인용 데이터를 -3~3 사이로 변환하겠다 변환할 테스트 데이터 선택
     X_test_s = scaler_X.transform(X_test)
+    # 3.3 정답 데이터 정제하여 작업하겠다.
+    #reshape(-1,1) → 가로로 된 데이터를 세로로 변환
+    # -1 = 개수는 알아서 계산( 가로로 존재하는 데이터 총 수를 모를 때 난 총 데이터 개수 모릅니다~ 표기법)
+    #      총 개수를 모를 때 사용하는 숫자법 중 하나
+    # 다이소에서 거울 총 개수 : 점장 -1
+    # 1 = 열은 1개로
     y_train_s = scaler_y.fit_transform(y_train.reshape(-1, 1)).ravel()
     # epsilon = 이 범위 안에 있는 모든 오차는 무시하겠다.
     svr = SVR(kernel='rbf', C=1.0, epsilon=0.1)
     svr.fit(X_train_s, y_train_s)
     pred_s = svr.predict(X_test_s)
+
+    # inverse_transform() 스케일링 으로 훈련을 위해 정제해놓은 데이터를 원상복구 시키는 작업
+    # 스케일링으로 예를 들어
+    # y 집값 ->                        서울 1억 경기도 9억 인천 8억 부산 15억
+    #  StandardScale을 이용해서           -3          -1       0          3    교체
+    #  다시 StandardScale을 이용해서   서울 1억 경기도 9억 인천 8억 부산 15억   원상복구
+
     pred = scaler_y.inverse_transform(pred_s.reshape(-1, 1)).ravel()
     print(f"SVR MSE :{mean_squared_error(y_test, pred)}")
     print(f"SVR 예측값(5개) : {pred[:5].round(1)}")
 
+
+회귀_SVR()
 # 감마종류확인()
 # 커널종류확인()
 # 마진확인방법()
