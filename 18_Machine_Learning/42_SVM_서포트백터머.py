@@ -51,7 +51,7 @@ SVM
 # 범위를 비슷하게 만들어서 계산 처리를 할 수 있게 세팅해주는 것이
 # 스 케 일 링!
 from sklearn.svm import SVC  # Support Vector Classifier
-from sklearn.datasets import load_iris, make_classification
+from sklearn.datasets import load_iris, make_classification, make_circles
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 
@@ -60,6 +60,9 @@ from sklearn.preprocessing import StandardScaler
 # 현재 데이터는 중요하지 않고 딱히 생각나는 데이터는 없지만
 # 모델 코딩하는 과정이나 특정 기능이 궁금할 때 사용
 # make_classification = 더미데이터
+
+# make_circles       = 가짜 데이터를 만들어서 임의적으로 무언가 확인할 때 사용
+#                      직선으로 못 나누는 가짜 데이터들 모임
 def 마진확인방법():
     X, y = make_classification(
         n_samples=100,  # 데이터 샘플 개수
@@ -81,6 +84,40 @@ def 마진확인방법():
     model_wide.fit(X, y)
     model_tight.fit(X, y)
     print(f"넓은 마진 서포트 벡터 수 : ", len(model_wide.support_vectors_))  # 30
-    print(f"좁은 마진 서포트 벡터 수 : ", len(model_tight.support_vectors_)) #  5
+    print(f"좁은 마진 서포트 벡터 수 : ", len(model_tight.support_vectors_))  # 5
 
-마진확인방법()
+
+def 커널종류확인():
+    # noise=0.1 데이터를 얼마나 뒤죽박죽으로 만들 것인가
+    # noise=  0 → 완벽한 원형 / 현실에는 없다.
+    # noise=0.1 → 살짝 흔들림 적당하다
+    # noise=0.5 → 너무 흔들려서 구분 불가 추천하지 않는 숫자
+    # make_classification = 흔들이유가 없는 정제된 랜덤 데이터이기 때문에
+    # noise 속성 자체가 없다.
+    # 하나하나 속성이 궁금하다면.. dir(도구기능) 으로 확인할 것
+    X, y = make_circles(n_samples=200, noise=0.1, random_state=42)
+
+    # 커널 종류
+    kernels = {
+        '리니어': SVC(kernel='linear'),  # 직선 경계 (선형형태로 분리 가능할 때)
+        '알비에프': SVC(kernel='rbf'),  # 방사형 기저 함수 - 원형/복잡한 경계에서 사용
+        # 가장 많이 사용됨 경계를 기준으로 사방으로 퍼지는 원형
+        '폴리': SVC(kernel='poly', degree=3),  # 다항식 경계 s자 곡선이나 여러 선으로 나눔
+        '시그모이드': SVC(kernel='sigmoid')  # 신경망과 비슷    딥러닝에서 보이는 형태
+        # s자 곡선으로 0~1 로 데이터 눌러버림 SVM 에서는 잘 안씀
+    }
+
+    # for 문을 이용해서 하나씩 정확도 확인
+    for 모델이름, 모델 in kernels.items():  # items() '키이름': 데이터 형태로 가져와 각 변수에 대입
+        모델.fit(X, y)
+        print(f"{모델이름} 정확도 : {모델.score(X, y):.3f}")
+    """
+    리니어 정확도 : 0.510
+    알비에프 정확도 : 0.830
+    폴리 정확도 : 0.565
+    시그모이드 정확도 : 0.510
+    """
+
+
+# 커널종류확인()
+# 마진확인방법()
