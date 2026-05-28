@@ -52,7 +52,7 @@ from sklearn.metrics import mean_squared_error
 # 스 케 일 링!
 from sklearn.svm import SVC, SVR  # Support Vector Classifier
 from sklearn.datasets import load_iris, make_classification, make_circles, make_regression
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.preprocessing import StandardScaler
 
 
@@ -181,7 +181,7 @@ def 회귀_SVR():
     X[:5] : [[ 1.85227818] [ 0.47359243] [-1.23086432] [ 0.62566735] [-0.07201012]]
     y[:5] : [137.09646394  59.0025564  -76.59207503  60.80391878  -8.88621709]
     """
-    #위에서 만들어진 가짜 데이터를 훈련용 데이터 정답   정답확용 테스트 20 데이터 정답 분리
+    # 위에서 만들어진 가짜 데이터를 훈련용 데이터 정답   정답확용 테스트 20 데이터 정답 분리
     X_train, X_test, y_train, y_test = train_test_split(
         X,
         y,
@@ -190,8 +190,8 @@ def 회귀_SVR():
     )
     # 스케일러를 따로 만드는 이유는
     # X와 y는 숫자 범위가 완전히 다르다
-    scaler_X = StandardScaler() # -  2 ~   2 사이이거나 -3   ~   3 사이이거나
-    scaler_y = StandardScaler() # -200 ~ 200 사이이거나 -500 ~ 500 사이이거나
+    scaler_X = StandardScaler()  # -  2 ~   2 사이이거나 -3   ~   3 사이이거나
+    scaler_y = StandardScaler()  # -200 ~ 200 사이이거나 -500 ~ 500 사이이거나
     # 범위 가 다르므로 각각 개별 범위에서 -3~3 사이로 맞추는것
     # scaler_X = StandardScaler()     -  2 ~   2 숫자들을 -3   ~   3 사이로 변환
     # scaler_y = StandardScaler()     -200 ~ 200 숫자들을 -500 ~ 500 사이로 변환
@@ -205,11 +205,11 @@ def 회귀_SVR():
 
     # 본격적으로 데이터 변환 작업 시작
     # 1. 훈련용 데이터를 -3~3 사이로 변환하겠다. 변환할 데이터 선택
-    X_train_s = scaler_X.fit_transform(X_train) # 학습시킬 데이터셋 정한 후 위에서 선택한 스탠다스스케일로 변환
+    X_train_s = scaler_X.fit_transform(X_train)  # 학습시킬 데이터셋 정한 후 위에서 선택한 스탠다스스케일로 변환
     # 2. 훈련이 제대로 되었는지 확인용 데이터를 -3~3 사이로 변환하겠다 변환할 테스트 데이터 선택
     X_test_s = scaler_X.transform(X_test)
     # 3.3 정답 데이터 정제하여 작업하겠다.
-    #reshape(-1,1) → 가로로 된 데이터를 세로로 변환
+    # reshape(-1,1) → 가로로 된 데이터를 세로로 변환
     # -1 = 개수는 알아서 계산( 가로로 존재하는 데이터 총 수를 모를 때 난 총 데이터 개수 모릅니다~ 표기법)
     #      총 개수를 모를 때 사용하는 숫자법 중 하나
     # 다이소에서 거울 총 개수 : 점장 -1
@@ -231,7 +231,48 @@ def 회귀_SVR():
     print(f"SVR 예측값(5개) : {pred[:5].round(1)}")
 
 
-회귀_SVR()
-# 감마종류확인()
-# 커널종류확인()
-# 마진확인방법()
+def 최적파라미터자동탐색_gridSearchCV():
+    # 어떤 C,gamma 값이 최선인지 자동으로 다 시도하는 방법
+    # 자동에 대한 설정값은 개발자가 직접 해주어야한다.
+
+    X, y = load_iris(return_X_y=True)
+    X_train, X_test, y_train, y_test = train_test_split(
+        X,
+        y,
+        test_size=0.2,
+        random_state=42
+    )
+
+    스케일러 = StandardScaler()
+    # 위에서 분리한 80 20 데이터를 스케일러로 정돈한 후 다시 X_train과 X_test에 담아준다.
+    X_train = 스케일러.fit_transform(X_train)
+    X_test = 스케일러.transform(X_test)
+
+    그리드파람 = {
+        'C': [0.1, 1, 10, 100],            # 4가지 조합
+        'gamma': [0.001, 0.01, 0.1, 1],    # 4가지 조합
+        'kernel': ['rbf', 'linear']        # 2가지 조합
+    }
+
+    # 4 x 4 x 2 = 32 가지 조합
+    # cv = 5 교차 검증 을 통해
+    # 총 32 x 5 = 160 번 학습
+    모델 = GridSearchCV(
+        SVC(),               # 어떤 모델로 탐색할 것인지
+        # 모델 선택 SVC() GridSearch가 알아서 ()에 그리드파람에 적힌 것을 기준으로 채워
+        # 파라미터 완성할 것
+        그리드파람,
+        cv=5,             # 몇 등분해서 검증할 것인가 cv=5 전체데이터를 5등분으로 나눠서 검증
+                            # 5번 학습한 것의 평균을 추후 조회
+        scoring='accuracy', # accuracy 정확도 기준 분류에서 가장 많이 사용
+                            # f1 f1점수 기준 데이터 불균형할 때 사용
+                            # roc_auc   의료/금융 사용
+        njobs=-1,           # 만약 회사컴퓨터에 cpu 가 여러대 있다면 몇 개 사용해서 계산할 것인가.
+                            # -1 있는거 다써라~  1개만 사용 4개만 사용
+                            # 개수가 많을 수록 모델 학습이 빨라진다.
+        verbose=1           # 진행상황을 얼마나 자세히 출력해서 보여줄까?
+                            # 0 아무것도 안보여줄거다~
+                            # 1 간단하게 보여줄게 ^^
+                            # 2 자세히 진행상황 확인
+                            # 3 매우매우 자세히 진행상황 확인
+    )
