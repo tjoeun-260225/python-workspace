@@ -76,10 +76,11 @@ import matplotlib
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.datasets import load_iris
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
 # 위에서 작성한 1~5번 까지의 모델들
 from sklearn.decomposition import PCA, KernelPCA, NMF
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
+from sklearn.manifold import LocallyLinearEmbedding as LLE
 
 # as 는 import가 있어야지 쓸 수 있다. from 만 있어서는 사용할 수 없다.
 
@@ -220,5 +221,86 @@ ax.set_xlabel('판별 축 1(LD1)')
 ax.set_ylabel('판별 축 2(LD2)')
 ax.legend()
 
+# =====================================================
+# 4. LLE(지역 선형 임베딩)
+# =====================================================
+# - 각 점을 주변 이웃들의 선형 조합으로 표현
+# - 비선형 매니폴드(구부러진 공간) 구조를 보존
+# - PCA : 전체를 한 번에 납작하게 누름( 전체기준 )
+# - LLE : 주변 이웃 관계를 유지하며 조심조심 펼침 (동네기준부터)
+# - n_neighbors : 이웃 수(너무 작으면 노이즈, 너무 크면 구조 왜곡)
+# =====================================================
+print("\n" + "=" * 50)
+print("4. LLE(지역 선형 임베딩)")
+print("=" * 50)
+lle = LLE(n_components=2, n_neighbors=10)
+X_lle = lle.fit_transform(X_scaled)  # 반드시 정답 데이터 도 작업해야한다.
+
+print(f"원본      차원 : {X_scaled.shape}")
+print(f"축소  후  차원 : {X_lle.shape}")
+print(f"재구성  오류도 : {lle.reconstruction_error_:.6f}")
+# 재구성 오류도 3d 지구본을 2d 지구본으로 얼마나 완벽하게 만들었는지
+# 재구성 오류도가 낮을 수록 원본 구조 잘 보존
+ax = axes[1, 0]
+for i, (label, color) in enumerate(zip(labels, colors)):
+    mask = y == i
+    ax.scatter(X_lle[mask, 0], X_lle[mask, 1], c=color, label=label, alpha=0.7)
+ax.set_title("LLE (지역 선형 임베딩)")
+ax.set_xlabel('성분 1')
+ax.set_ylabel('성분 2')
+ax.legend()
+
+# =====================================================
+# 5. NMF(비음수 행렬 분해)
+# =====================================================
+# - 데이터를 W(비율 ) x H(패턴) 두 행렬의 곱으로 분해
+# - 피자 = 도우 x 0.4 + 소스 x 0.3 + 치즈 x 0.2 + 토핑 x 0.1
+# - 모든 값이 0 이상이어야 함 → MinMaxScalr 사용 (0~1 사이로 변환 음수 없음)
+#                               StandardScaler 음수가 발생하므로 사용 불가
+# - 이미지, 텍스트 데이터 적합
+# =====================================================
+print("\n" + "=" * 50)
+print("5. NMF(비음수 행렬 분해)")
+print("=" * 50)
+# 음수가 불가하여 StandardScaler 사용할 수 없다.
+# 0과 1 사이만 존재하는 MinMaxScaler 사용
+X_positive = MinMaxScaler().fit_transform(X)
+
+nmf = NMF(n_components=2, random_state=42, max_iter=500)
+X_nmf = nmf.fit_transform(X_positive)
+print(f"원본      차원 : {X_positive.shape}")
+print(f"축소  후  차원 : {X_nmf.shape}")
+print(f"재구성  오류도 : {nmf.reconstruction_err_:.6f}") # 낮을 수록 원본 잘 보존
+ax = axes[1, 1]
+for i, (label, color) in enumerate(zip(labels, colors)):
+    mask = y == i
+    ax.scatter(X_nmf[mask, 0], X_nmf[mask, 1], c=color, label=label, alpha=0.7)
+ax.set_title("NMF (비음수 행렬 분해)")
+ax.set_xlabel('성분 1')
+ax.set_ylabel('성분 2')
+ax.legend()
+
 plt.tight_layout()
 plt.show()
+'''
+데이터에 따른 1~5 시각화 모델 사용 예
+
+이미지 / 텍스트(음수가 없는 글자나 숫자) = 5. NMF
+                                                뉴스 기사 단어 빈도 / 얼굴 사진 픽셀
+y 라벨 있음( 분류 문제 )                 = 3. LDA
+                                                 y라벨 있음
+일반 숫자 데이터
+           선형으로 분리된다.            = 1. PCA
+                                                 고객 구매 내역(나이/연봉/구매금액...)
+           원형/나선형 꼬임              = 2. 커널PCA (= PCA 결과 별로일 때 사실 많이 사용)
+                                                 동심원/나선형 데이터
+           구부러진 3D구조               = 4. LLE
+                                                 3D 데이터
+
+'''
+
+
+
+
+
+
