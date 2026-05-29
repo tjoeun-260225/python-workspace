@@ -86,3 +86,61 @@ X, y = make_blobs(n_samples=300, centers=3, random_state=42)
 # make_blobs 동글동글한 덩어리 데이터 생성
 # n_samples = 300 데이터 300개
 # centers   =  3  덩어리 3개
+
+
+# ==========================================================
+# 1. K-Means
+# ==========================================================
+kmeans = KMeans(n_clusters=3, random_state=42)
+# n_clusters=3 → 3개의 그룹으로 나눠줘
+# 몇 개의 그룹으로 나눌지는 개발자가 직접 지정
+labels_km = kmeans.fit_predict(X)
+# fit_predict = 학습하고 바로 그룹번호 반환
+# 결과적으로 [0,1,2,0,1,2,1,2,0,1,1,2,...] 나온다.
+
+
+ax = axes[0]
+ax.scatter(X[:, 0], X[:, 1], c=labels_km, cmap='Set1', alpha=0.7)
+ax.scatter(
+    kmeans.cluster_centers_[:, 0],  # 중심점 X좌표
+    kmeans.cluster_centers_[:, 1],  # 중심점 Y좌표
+    c='black', marker='X', s=200, label='중심점'
+)
+ax.set_title('K-Means')
+ax.legend()
+# ==========================================================
+# 2. DBSCAN
+# 꼬인 데이에 강함
+# make_moon 초승달 모양 2개 데이터 K-Means 으로 나눌 수 없는 없데이터
+# ==========================================================
+X_moon, _ = make_moons(n_samples=300, noise=0.1, random_state=42)
+# n_samples 300 개의 초승달 데이터
+# noise=    0.1 약간의 노이즈 추가
+
+dbscan = DBSCAN(eps=0.2, min_samples=5)
+# eps=0.2       → 0.2 거리 안에 있으면 이웃으로 봄
+# min_samples=5 → 이웃이 5개 이상이면 그룹으로 인정
+# 이웃이 없으면 → -1 (노이즈, 이상치) 처리
+
+labels_db = dbscan.fit_predict(X_moon)
+
+ax = axes[1]
+ax.scatter(X_moon[:, 0], X_moon[:, 1], c=labels_db, cmap='Set1', alpha=0.7)
+ax.set_title('DBSCAN 노이즈(-1로 표기)')
+
+# ==========================================================
+# 3. 계층적 군집화
+# ==========================================================
+
+hc = AgglomerativeClustering(n_clusters=3)
+# Agglomerative = 아래에서 위로 합쳐가는 방식
+# 가장 가까운 것끼리 하나씩 합쳐서 최종 3그룹으로 만들겠다.
+# 그룹 개수는 개발자 분석가가 지정
+labels_hc = hc.fit_predict(X)
+
+ax = axes[2]
+ax.scatter(X[:, 0], X[:, 1], c=labels_hc, cmap='Set1', alpha=0.7)
+ax.set_title('계층적 군집화')
+
+plt.tight_layout()
+plt.show()
