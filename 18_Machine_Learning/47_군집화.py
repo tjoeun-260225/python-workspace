@@ -69,19 +69,18 @@ DBSCAN  → 이상한 데이터 걸러줘
 모델결과를 주로 시각화해서 표기
 """
 
-import numpy as np
-import matplotlib.pyplot as plt
-from sklearn.datasets import make_blobs, make_moons
-from sklearn.cluster import KMeans, DBSCAN, AgglomerativeClustering
-
+import matplotlib.pyplot as plt # 그래프 그리는 도구
+from sklearn.datasets import make_blobs, make_moons # 가짜 연습용 데이터
+from sklearn.cluster import KMeans, DBSCAN, AgglomerativeClustering # 3가지 그룹 묶기 모델
 # 계층적 = AgglomerativeClustering
-
 plt.rcParams['font.family'] = 'Malgun Gothic'
 plt.rcParams['axes.unicode_minus'] = False
 
+# 1개의 창에 그림 3개를 나란히 배치하는 것 가로=15, 세로=4
 fig, axes = plt.subplots(1, 3, figsize=(15, 4))
 fig.suptitle('군집화 3가지 비교')
 
+# 동글동글한 점 300개를 3덩어리로 만들기
 X, y = make_blobs(n_samples=300, centers=3, random_state=42)
 # make_blobs 동글동글한 덩어리 데이터 생성
 # n_samples = 300 데이터 300개
@@ -91,16 +90,32 @@ X, y = make_blobs(n_samples=300, centers=3, random_state=42)
 # ==========================================================
 # 1. K-Means
 # ==========================================================
-kmeans = KMeans(n_clusters=3, random_state=42)
+kmeans = KMeans(n_clusters=3, random_state=42) # 3개 그룹으로 나눠줘 AI에게 지시하는 것
 # n_clusters=3 → 3개의 그룹으로 나눠줘
 # 몇 개의 그룹으로 나눌지는 개발자가 직접 지정
-labels_km = kmeans.fit_predict(X)
+labels_km = kmeans.fit_predict(X) # AI가 데이터 보고 학습하고 바로 그룹번호 붙이기
 # fit_predict = 학습하고 바로 그룹번호 반환
 # 결과적으로 [0,1,2,0,1,2,1,2,0,1,1,2,...] 나온다.
 
 
-ax = axes[0]
+ax = axes[0] # 0번째 그래프
+# 2차원 표(행,렬) 데이터를 꺼내는 방법
+# X 데이터는 아래와 같이 생겼다.
+#      0번열     1번열
+# 0행  [1.2 ,    3.4]  ← 점 1개 (x좌표, y좌표)
+# 1행  [5.6 ,    2.1]  ← 점 1개 (x좌표, y좌표)
+# 2행  [3.3 ,    7.8]  ← 점 1개 (x좌표, y좌표)
+# X[   :   ,  0   ]
+#      ↑      ↑
+#     행     렬
+#   :    = 모든 행 (전부 다)
+#   0    = 0번 열만 (x좌표만 갖고 오겠다.
+#         모든점의  모든점의
+#         x좌표만   y좌표만
+#         뽑아줘    뽑아줘
+# 그래프에 점을 찍으려면 x,y 좌표로 하여 찍어야 하기 때문에 각 데이터 위치에 찍는 형태
 ax.scatter(X[:, 0], X[:, 1], c=labels_km, cmap='Set1', alpha=0.7)
+# 각 3그룹의 중심점을 검정색 X로 표기하겠다.
 ax.scatter(
     kmeans.cluster_centers_[:, 0],  # 중심점 X좌표
     kmeans.cluster_centers_[:, 1],  # 중심점 Y좌표
@@ -114,15 +129,21 @@ ax.legend()
 # make_moon 초승달 모양 2개 데이터 K-Means 으로 나눌 수 없는 없데이터
 # ==========================================================
 X_moon, _ = make_moons(n_samples=300, noise=0.1, random_state=42)
+# 초승달 모양 데이터 300개 만들기(noise=0.1 은 약간 흐트러진 느낌, 완벽한 초승달 말고
+# 약간 삐뚤삐뚤한 초승달 그리기)
 # n_samples 300 개의 초승달 데이터
 # noise=    0.1 약간의 노이즈 추가
 
 dbscan = DBSCAN(eps=0.2, min_samples=5)
+# 0.2 거리 안에 친구가 5명 이상 있어야지 그룹으로 판정
+# 4명 이하는 그룹으로 보지 않고, 이상한 데이터로 치부 삭제
+# 거리와 그룹별 인원 수는 개발자가 지정
+
 # eps=0.2       → 0.2 거리 안에 있으면 이웃으로 봄
 # min_samples=5 → 이웃이 5개 이상이면 그룹으로 인정
 # 이웃이 없으면 → -1 (노이즈, 이상치) 처리
 
-labels_db = dbscan.fit_predict(X_moon)
+labels_db = dbscan.fit_predict(X_moon) # 초승달 데이터에 위 규칙 적용해서 그룹 번호 붙여줘
 
 ax = axes[1]
 ax.scatter(X_moon[:, 0], X_moon[:, 1], c=labels_db, cmap='Set1', alpha=0.7)
