@@ -79,7 +79,6 @@ from sklearn.preprocessing import StandardScaler
 # 위에서 작성한 1~5번 까지의 모델들
 from sklearn.decomposition import PCA, KernelPCA, NMF
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
-
 # as 는 import가 있어야지 쓸 수 있다. from 만 있어서는 사용할 수 없다.
 
 # 모델을 들어가기 전에 공통적으로 설정해야하는 데이터 호출, 시각화 세팅 진행
@@ -90,6 +89,12 @@ plt.rcParams['axes.unicode_minus'] = False
 
 # 데이터 준비 (iris 붓꽃 데이터 셋 사용)
 X, y = load_iris(return_X_y=True)
+print("행렬 확인 : ", X.shape)  # 행렬 확인 :  (150, 4)
+print("헤드 확인 : ", X[:5])  # 0~ 4 앞 5개의 행 출력
+
+# df = pd.DataFrame(X, columns=iris.feature_names) 와 같이 변환해서 사용
+# print("헤드 확인 : ", df.head()) # head()는 csv 파일에서 사용
+
 # labels = load_iris.target_names error 발생
 labels = load_iris().target_names  # load_iris() 붓꽃 데이터 가져오기는 ()가 뒤에 있어야한다.
 print("labels : ", labels)  # labels :  ['setosa' 'versicolor' 'virginica']
@@ -97,10 +102,48 @@ print("labels : ", labels)  # labels :  ['setosa' 'versicolor' 'virginica']
 # 데이터 전처리 작업
 # 어떤 데이터와 어떤 모델을 사용하느냐에 따라 전처리 작업은 모두 다르다.
 # 많은 모델과 많은 데이터를 만나며 사용방법을 익히는 것이 가장 중요
-scalar = StandardScaler
+scalar = StandardScaler()
 X_scaled = scalar.fit_transform(X)
 
 colors = ['red', 'green', 'blue']
 
-fig, axes = plt.subplot(2, 3, figsize=(15, 10))
-fig.suptitle('title', fontsize=16)
+fig, axes = plt.subplots(2, 3, figsize=(15, 10))
+fig.suptitle('차원축소 기법 비교', fontsize=16)
+
+# 붓꽃은 꽃받침 길이 / 꽃받침 너비 / 꽃잎 길이 / 꽃잎 너비
+# 총 4개의 컬럼으로 되어있다. = 4차원
+# 컬럼이 100개라면? 100차원
+
+# =====================================================
+# 1. PCA(주성분 분석)
+# =====================================================
+# - 데이터 분산이 최대가 되는 방향으로 축을 찾아서 투영
+# - 선형 변환만 가능, 속도 빠름
+# - 반드시 StandardScaler 정규화 후 사용
+# - 붓꽃 데이터 뿐만 아니라 숫자로 되어있는 컬럼이 많은 데이터는
+#   대부분 숫자들이 중구난방이기 때문에 (예: 나이 / 키 / 연봉  숫자대가 중구난방)
+#   공통된 범위를 제공하여 모델 학습
+# =====================================================
+print("\n" + "=" * 50)
+print("1. PCA")
+print("=" * 50)
+
+pca = PCA(n_components=2)  # 4차원을 2차원으로 축소
+X_pca = pca.fit_transform(X_scaled)
+
+print(f"원본      차원 : {X_scaled.shape}")
+print(f"축소  후  차원 : {X_pca.shape}")
+print(f"분산 설명 비율 : {pca.explained_variance_ratio_}")
+# 각 주성분이 말하는 분산 비율
+print(f"총   설명 분산 : {sum(pca.explained_variance_ratio_):.4f}")
+# 합계가 높을수록 정보 손실 적다.
+
+ax = axes[0, 0]
+for i, (label, color) in enumerate(zip(labels, colors)):
+    mask = y == i  # 해당 클래스만 True
+    ax.scatter(X_pca[mask, 0], X_pca[mask, 1], c=color, label=label, alpha=0.7)
+
+ax.set_title("PCA")
+ax.set_xlabel('주성분1 (PC1)')
+ax.set_ylabel('주성분2 (PC2)')
+ax.legend()
