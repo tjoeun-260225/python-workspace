@@ -72,6 +72,7 @@
 """
 
 # 보통 차원 축소는 시각화까지 해서 확인
+import matplotlib
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.datasets import load_iris
@@ -79,6 +80,7 @@ from sklearn.preprocessing import StandardScaler
 # 위에서 작성한 1~5번 까지의 모델들
 from sklearn.decomposition import PCA, KernelPCA, NMF
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
+
 # as 는 import가 있어야지 쓸 수 있다. from 만 있어서는 사용할 수 없다.
 
 # 모델을 들어가기 전에 공통적으로 설정해야하는 데이터 호출, 시각화 세팅 진행
@@ -88,26 +90,28 @@ plt.rcParams['font.family'] = 'Malgun Gothic'
 plt.rcParams['axes.unicode_minus'] = False
 
 # 데이터 준비 (iris 붓꽃 데이터 셋 사용)
-X, y = load_iris(return_X_y=True)
+X, y = load_iris(return_X_y=True)  # X = 붓꽃데이터 , y = 붓꽃데이터 정답
 print("행렬 확인 : ", X.shape)  # 행렬 확인 :  (150, 4)
 print("헤드 확인 : ", X[:5])  # 0~ 4 앞 5개의 행 출력
 
 # df = pd.DataFrame(X, columns=iris.feature_names) 와 같이 변환해서 사용
 # print("헤드 확인 : ", df.head()) # head()는 csv 파일에서 사용
 
-# labels = load_iris.target_names error 발생
-labels = load_iris().target_names  # load_iris() 붓꽃 데이터 가져오기는 ()가 뒤에 있어야한다.
-print("labels : ", labels)  # labels :  ['setosa' 'versicolor' 'virginica']
+# labels = load_iris.target_names error 발생 # load_iris() 붓꽃 데이터 가져오기는 ()가 뒤에 있어야한다
+labels = load_iris().target_names  # labels :  ['setosa' 'versicolor' 'virginica']
+# print("labels : ", labels)
 
 # 데이터 전처리 작업
 # 어떤 데이터와 어떤 모델을 사용하느냐에 따라 전처리 작업은 모두 다르다.
 # 많은 모델과 많은 데이터를 만나며 사용방법을 익히는 것이 가장 중요
-scalar = StandardScaler()
-X_scaled = scalar.fit_transform(X)
+scalar = StandardScaler()  # 스케일러라는 공간에 정규화 도구 를 추가
+X_scaled = scalar.fit_transform(X)  # 스케일러 안에 존재하는 정규화 도구를 이용해서
+# fit(평균/표준편차 계산) +transform(실제 변환작업)처리
 
-colors = ['red', 'green', 'blue']
+colors = ['red', 'green', 'blue']  # 꽃 3종류가 어떻게 분포되어 있는지 색상으로 비교하기 위해 설정
 
-fig, axes = plt.subplots(2, 3, figsize=(15, 10))
+# 아래 2행 3열은 필수가 아니나.. 다른 모델들은 어떻게 표현하는지 확인하기 위해 세팅
+fig, axes = plt.subplots(2, 3, figsize=(15, 10))  # 총 2행 3열로 6칸 그래프 틀 생성
 fig.suptitle('차원축소 기법 비교', fontsize=16)
 
 # 붓꽃은 꽃받침 길이 / 꽃받침 너비 / 꽃잎 길이 / 꽃잎 너비
@@ -128,17 +132,29 @@ print("\n" + "=" * 50)
 print("1. PCA")
 print("=" * 50)
 
-pca = PCA(n_components=2)  # 4차원을 2차원으로 축소
-X_pca = pca.fit_transform(X_scaled)
+# 붓꽃은 꽃받침 길이 / 꽃받침 너비 / 꽃잎 길이 / 꽃잎 너비
+# 여기서 2차원으로 줄일 때 기준은? 길이나 너비 꽃받침 꽃잎 중 2가지는  버려진 것
+# 살아남은 2가지의 기준과 버려진 2가지의 기준
+# PCA 모델 자체에서 학습을 할 때 중요한 컬럼 순서대로 줄을 세운 뒤, 내가 필요한 개수만큼
+# 앞에서부터 자르는 것
+# 데이터 평균을 낸 후 , 모델 학습할 때 필요한 정도를 테스트하며 모델 완성
+# 1번 사진 꽃받침 길이 꽃받침 너비를 너무 중요하게 생각해서 냅두고 모델 정답 → 틀림
+# 2번 사진 꽃받침 너비 꽃받침 너비를 너무 중요하게 생각해서 냅두고 모델 정답 → 틀림
+# 3번 사진 꽃받침 길이   꽃잎 길이를 너무 중요하게 생각해서 냅두고 모델 정답 → 정답
+#            꽃잎 길이가 중요하거나 꽃받침 길이가 중요할 수 있겠다 우선순위 올라감
+# 이런식으로 우선순위를 배치
 
-print(f"원본      차원 : {X_scaled.shape}")
-print(f"축소  후  차원 : {X_pca.shape}")
-print(f"분산 설명 비율 : {pca.explained_variance_ratio_}")
+pca = PCA(n_components=2)  # 4차원을 2차원으로 축소
+X_pca = pca.fit_transform(X_scaled)  # 4차원 데이터를 2차원으로 변환
+
+print(f"원본      차원 : {X_scaled.shape}")  # 원본      차원 : (150, 4)
+print(f"축소  후  차원 : {X_pca.shape}")  # 축소  후  차원 : (150, 2)
+print(f"분산 설명 비율 : {pca.explained_variance_ratio_}")  # 분산 설명 비율 : [0.72962445 0.22850762]
 # 각 주성분이 말하는 분산 비율
-print(f"총   설명 분산 : {sum(pca.explained_variance_ratio_):.4f}")
+print(f"총   설명 분산 : {sum(pca.explained_variance_ratio_):.4f}")  # 총   설명 분산 : 0.9581
 # 합계가 높을수록 정보 손실 적다.
 
-ax = axes[0, 0]
+ax = axes[0, 0]  # 위에서 작업한 것을 6칸 중에서 맨 첫번째 칸에 배치하겠다.
 for i, (label, color) in enumerate(zip(labels, colors)):
     mask = y == i  # 해당 클래스만 True
     ax.scatter(X_pca[mask, 0], X_pca[mask, 1], c=color, label=label, alpha=0.7)
@@ -147,3 +163,62 @@ ax.set_title("PCA")
 ax.set_xlabel('주성분1 (PC1)')
 ax.set_ylabel('주성분2 (PC2)')
 ax.legend()
+
+# plt.tight_layout()
+# plt.show()
+
+
+# =====================================================
+# 2. 커널 PCA(Kernel PCA)
+# =====================================================
+# - PCA를 비선형으로 확장
+# - 커널 함수로 고차원 공간에서 PCA 수행
+# - 커널 종류 : rbf, ploy, sigmoid, consine
+# =====================================================
+print("\n" + "=" * 50)
+print("2. Kernel PCA")
+print("=" * 50)
+kpca = KernelPCA(n_components=2, kernel='rbf', gamma=0.1)
+X_kpca = kpca.fit_transform(X_scaled)
+print(f"원본      차원 : {X_scaled.shape}")
+print(f"축소  후  차원 : {X_kpca.shape}")
+print(f"사용 커널 : rbf (가우시안)")
+
+ax = axes[0, 1]  # PCA 옆에 배치
+for i, (label, color) in enumerate(zip(labels, colors)):
+    mask = y == i
+    ax.scatter(X_kpca[mask, 0], X_kpca[mask, 1], c=color, label=label, alpha=0.7)
+ax.set_title("Kernel PCA (RBF)")
+ax.set_xlabel('컴포넌트 1')
+ax.set_ylabel('컴포넌트 2')
+ax.legend()
+
+# =====================================================
+# 3. LDA(선형 판별 분석)
+# =====================================================
+# - PCA : 데이터 퍼짐(분산)을 최대화 -> 클래스 무시
+# - LDA : 클래스 간의 거리를 최대화  -> 클래스 정보(y) 사용
+# - 지도학습 방식(레이블 y 필요)
+# - 최대 축소 차원 수 = 클래스 수 -1 (3클래스면 최대 2차원)
+# =====================================================
+print("\n" + "=" * 50)
+print("3. LDA(선형 판별 분석)")
+print("=" * 50)
+lda = LDA(n_components=2)
+X_lda = lda.fit_transform(X_scaled, y)  # 반드시 정답 데이터 도 작업해야한다.
+
+print(f"원본      차원 : {X_scaled.shape}")
+print(f"축소  후  차원 : {X_lda.shape}")
+print(f"판별 설명 비율 : {lda.explained_variance_ratio_}")
+
+ax = axes[0, 2]
+for i, (label, color) in enumerate(zip(labels, colors)):
+    mask = y == i
+    ax.scatter(X_lda[mask, 0], X_lda[mask, 1], c=color, label=label, alpha=0.7)
+ax.set_title("LDA (선형 판별 분석)")
+ax.set_xlabel('판별 축 1(LD1)')
+ax.set_ylabel('판별 축 2(LD2)')
+ax.legend()
+
+plt.tight_layout()
+plt.show()
