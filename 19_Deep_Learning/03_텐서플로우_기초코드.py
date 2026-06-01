@@ -94,7 +94,9 @@ model = tf.keras.Sequential([   #뇌만들기 시작!
     # 표형태로 된 데이터를 분석 2d  컬러 이미지 다. 3d
 
     # 과 같이 작성
+    # 어떤 데이터를 뇌가 처음에 보게 할 것인가
     tf.keras.layers.Dense(5, activation='relu', input_shape=(10, )), #input_shape=(10, 0))
+    # 마지막으로 뇌에서 보여줄 데이터는 몇 개 인가 어떤 데이터인가
     tf.keras.layers.Dense(1)
 ])
 """
