@@ -36,7 +36,7 @@ from sklearn.neighbors import KNeighborsClassifier
 - 앱이나 다른 서버에 모델을 올릴 때 사용
 - 입문 단계에서는 난이도 있다.
 
-4. h5/keras (.h5)
+4. h5/keras (.h5 / keras)
 - 딥러닝(tensorflow, keras) 전용
 - scikit-learn 모델엔 사용 안 함
 - 나중에 딥러닝 배울 때 배울 모델

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>옷 종류 분류기</title>
+    <style>
+        body { text-align: center; font-family: Arial; padding: 50px; background: #f5f5f5; }
+        .box { background: white; padding: 40px; border-radius: 20px; display: inline-block; }
+        input[type=file] { margin: 20px; padding: 10px; }
+        button { padding: 12px 30px; font-size: 16px; background: #4CAF50; color: white; border: none; border-radius: 10px; cursor: pointer; }
+        #preview { width: 200px; height: 200px; margin: 20px auto; border: 2px dashed #ccc; }
+        #result { font-size: 48px; font-weight: bold; color: #333; margin: 20px; }
+        #confidence { font-size: 20px; color: gray; }
+    </style>
+</head>
+<body>
+<div class="box">
+    <h1>옷 종류 분류기</h1>
+    <p>옷 이미지를 업로드하면 AI가 종류를 맞춰요.</p>
+
+    <input type="file" id="fileInput" accept="image/*" onchange="preview()">
+    <br>
+    <img id="preview" src="" style="display:none; width:200px;">
+    <br>
+    <button onclick="predict()">예측하기</button>
+
+    <div id="result">?</div>
+    <div id="confidence"></div>
+</div>
+
+<script>
+    function preview() {
+        const file = document.getElementById('fileInput').files[0];
+        const img = document.getElementById('preview');
+        img.src = URL.createObjectURL(file);
+        img.style.display = 'block';
+    }
+
+    function predict() {
+        const file = document.getElementById('fileInput').files[0];
+        if (!file) { alert('이미지를 먼저 선택하세요'); return; }
+
+        const formData = new FormData();
+        formData.append('image', file);
+
+        fetch('/predict', { method: 'POST', body: formData })
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('result').innerText = data.result;
+                document.getElementById('confidence').innerText = '확률: ' + data.confidence;
+            });
+    }
+</script>
+</body>
+</html>
