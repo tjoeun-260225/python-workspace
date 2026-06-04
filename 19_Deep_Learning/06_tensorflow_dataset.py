@@ -19,6 +19,8 @@ Fashion MNIST     옷  분류   10개 데이터셋
 CIFAR-10          사진분류   10개 데이터셋
 IMDB              감정분류   1개
 Boston Housing    집값예측   1개            회귀 : mse
+- Boston 윤리적인 문제로 사용 자제
+- california 집값 예측 사용
 
 보통 분류는       마지막층에 몇 개의 분류가 나오고, softmax 많이 사용하며
                     Dense(분류개수, activation='softmax')
@@ -28,9 +30,10 @@ Boston Housing    집값예측   1개            회귀 : mse
 loss 이미지 글자 예측 도 많이 사용하는 loss가 정해져 있다.
 """
 import tensorflow as tf
-from tensorflow.keras.datasets import mnist, fashion_mnist, california_housing
+from tensorflow.keras.datasets import mnist, fashion_mnist, california_housing, imdb
 from tensorflow.keras import Sequential
-from tensorflow.keras.layers import Dense, Input, Flatten
+from tensorflow.keras.layers import Dense, Input, Flatten, Embedding, GlobalAvgPool1D
+from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 
 # 1. MNIST - 손글씨 숫자
@@ -171,3 +174,121 @@ def 캘리포니아집값예측():
     model.fit(X_train, y_train, epochs=50, verbose=1)
     loss = model.evaluate(X_test, y_test, verbose=1)
     print(f"캘리포니아 집값 예측 : {loss:.2f}%")
+
+# 4. 영화 리뷰 긍정 부정 분류 - 정답 1 긍정 정답 0 부정 텍스트 데이터
+#     이미지처럼 2D 를 1D 변형하거나 와 같은 작업 필요 없음
+#     단어 → 숫자 변환
+#     Dense 결과는 2개 일 수 있고 1개 일 수 있다.
+#     3개 이상부터는 Dense 가 3 이 되어야 하고, 분류 개수 만큼 Dense 결과를 세팅
+#     2개는 Dense(2)  or Dense(1) 일 수 있다.
+#     정답만 출력해 정답 이외 나머지는 오답으로 처리하면 되기 때문
+#     마지막에 Dense가 1일 경우 sigmoid 사용
+def 영화리뷰긍정부정분류_Dense1():
+    # 1. 데이터 불러오기
+    """
+    indices[6,173] = 62554 is not in [0, 10000)
+	 [[{{node sequential_1/embedding_1/GatherV2}}]] [Op:__inference_multi_step_on_iterator_1344]
+
+    imdb = 영화리뷰 데이터 = 8,8000 개
+    """
+    # 아래와 같이 호출하면 8,8000 개의 데이터를 가져오게 되고,
+    # 얼마나 쓸지 정하지 않으면 메모리 폭발 위험이 있으므로 반드시 몇 개의 데이터만 사용하겠다
+    # 매개변수를 사용하지 않으면 에러 발생
+    #(X_train, y_train), (X_test, y_test) = imdb.load_data()
+    # 전체 단어 8,8000 개 중에서 몇 개의 단어를 사용할 것인지 지정
+    # num_words = 10,000 에서 많이 시작
+    #  5000 개 → 가볍고 정확도 낮음
+    # 10000 개 → 보통 평균적으로 많이 시작 사용
+    # 20000 개 → 무겁지만 정확도 높다.
+    (X_train, y_train), (X_test, y_test) = imdb.load_data(num_words=10000)
+
+    # 2. 입력층을 위하여 리뷰마다 다른 길이를 통일
+    X_train = pad_sequences(X_train, maxlen=200)
+    X_test = pad_sequences(X_test, maxlen=200)
+
+    # 3. 모델 머신러닝과 같은 모델 직접 만들기
+    model = Sequential([
+        Input(shape=(200,)), # 위에서 리뷰 길이를 각각 통일한 데이터셋
+        # Embedding = 단어들의 뜻이 적힌 사전의 크기
+        # Embedding 에서 첫번째로 오는 숫자는 num_words=10000 로 지정한 숫자와 동일
+        # Embedding(num_words 로 지정한 숫자와 동일 ,단어 하나를 벡터로 표현하는 크기),
+        # Embedding(위에서 설정한 숫자 ,개발자가 정하는 숫자)
+        #                                  8 → 너무 작음
+        #                                 16 → 간단한 감정분류에는 충분
+        #                                 32 → 조금 더 복잡한 텍스트
+        #                                128 → 고성능 자연어 처리
+        # Dense 도 동일하게 (뉴런숫자) 뉴런숫자나 개발자가 정하는 숫자가
+        # 커질수록 성능은 올라가고 컴퓨터는 느려지며
+        # 작을수록 빠르고 성능 낮아짐
+        # Dense 는 무조건 큰게 좋은건 아니다.
+        Embedding(10000,16),
+        GlobalAvgPool1D(), # 위에서 만든 단어숫자를 배열형태로 변환
+        # relu = 0 보다 작으면 0처리, 0보다 크면 그냥 통과
+        # 음수를 모두 0으로 변환
+        # sigmoid = 마지막 레이어에서 0.5 를 기준으로 0.9면 1과 가까우므로 긍정처리
+        # softmax = 1.0 을 기준으로 2개 이상의 분류들의 % 비율을 100% 기준으로 조절하여
+        #     몇 퍼센트 확률로 무엇 분류에 가깝다 판단하고 그 분류로 정답 제공
+        #  사막 여우  고양이 70% 강아지 20% 돼지 10% 가 닮은 것같아
+        #           = 고양이
+        Dense(16, activation='relu'),
+        Dense(1,activation='sigmoid')
+    ])
+    # epochs 와 Dense 16 조절해서 정확도 향상
+    # 4. 컴파일 & 학습
+    model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+    model.fit(X_train, y_train, epochs=15, verbose=2)
+
+    # 5. 평가
+    loss, acc = model.evaluate(X_test, y_test,  verbose=0)
+    print(f"긍정 부정 정확도 : {acc * 100:.1f}%")
+
+def 영화리뷰긍정부정분류_Dense2():
+    (X_train, y_train), (X_test, y_test) = imdb.load_data(num_words=10000)
+    X_train = pad_sequences(X_train, maxlen=200)
+    X_test = pad_sequences(X_test, maxlen=200)
+    model = Sequential([
+        Input(shape=(200,)),
+        Embedding(10000,16),
+        GlobalAvgPool1D(),
+        Dense(16, activation='relu'),
+        Dense(2,activation='softmax')
+    ])
+    # binary_crossentropy = 텍스트의 정답이 두가지로 분류될 때 오차 계산하는 방법
+    # binary = 2개 짜리
+    # crossentropy = 오차 계산 방식
+    # 예측값이 정답에서     멀수록 → 오차 크게
+    # 예측값이 정답에서 가까울수록 → 오차 작게
+    # 예를 들어 정답 1 (긍정) 인데
+    #  예측 0.9 → 오차 작음 (거의 맞네)
+    #  예측 0.5 → 오차 중간
+    #  예측 0.1 → 오차 매우 크다 (완전 틀림)
+
+    """
+    정답이 0  또는    1    → binary_crossentropy              → 개/고양이 긍정/부정
+    정답이 0, 1, 2 숫자    → sparse_categorical_crossentropy  →  MNIST, 붓꽃, Fashion
+    정답이 집값, 온도 숫자 → mse                              → 캘리포니아 집값 예측
+    
+    정답 2개            binary_crossentropy
+    정답 3개       이상 sparse_categorical_crossentropy
+    정답 예측 해야한다. mse
+    
+    loss 는 결국 정답= 뇌에서 마지막 출력층이 어떻게 생겼는가에 따라 달라진다.
+    metrics 는 분류와 회귀가 작성하는게 다르다.
+    """
+    model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+    model.fit(X_train, y_train, epochs=15, verbose=2)
+    loss, acc = model.evaluate(X_test, y_test,  verbose=0)
+    print(f"긍정 부정 정확도 : {acc * 100:.1f}%")
+
+
+
+
+
+
+
+
+
+
+
+
+

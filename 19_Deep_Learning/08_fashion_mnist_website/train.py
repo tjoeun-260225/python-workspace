@@ -2,6 +2,12 @@ from tensorflow.keras.datasets import fashion_mnist
 from tensorflow.keras import Sequential
 from tensorflow.keras.layers import Input, Flatten, Dense
 
+# fashion_mnist 의 경우 데이터셋이 흑백이기 때문에
+# 흰 배경에 옷만 있는 이미지 거의 가능
+# 가운데 정렬된 데이터만 가능
+# 사람이 입고 있는 사진이나 복잡한 배경 고해상도의 컬러 사진 불가
+# 이 과정을 해결하기 위한 개선된 모델 출시
+
 labels = ['티셔츠', '바지', '스웨터', '드레스', '코트',
           '샌들', '셔츠', '스니커즈', '가방', '부츠']
 
