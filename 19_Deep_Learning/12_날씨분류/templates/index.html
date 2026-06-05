@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>날씨 분류기</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial;
+            background: #e8f4fd;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            width: 400px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        p {
+            color: #888;
+            margin-bottom: 24px;
+            font-size: 14px;
+        }
+
+        .upload-box {
+            border: 2px dashed #ccc;
+            border-radius: 12px;
+            padding: 30px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+
+        .upload-box:hover {
+            border-color: #2196F3;
+        }
+
+        #preview {
+            width: 100%;
+            max-height: 250px;
+            object-fit: contain;
+            border-radius: 8px;
+            display: none;
+            margin-bottom: 16px;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .result-box {
+            margin-top: 24px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 12px;
+            display: none;
+        }
+
+        .result-box.unknown {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+        }
+
+        .label.unknown {
+            color: #856404;
+        }
+
+        .animal {
+            font-size: 64px;
+            margin-bottom: 8px;
+        }
+
+        .label {
+            font-size: 28px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .conf {
+            font-size: 14px;
+            color: #888;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+<div class="card">
+    <h1>🌤️ 날씨 분류기</h1>
+    <p>날씨 사진을 올리면 AI가 어떤 날씨인지 맞춰요.</p>
+
+    <div class="upload-box" onclick="document.getElementById('fileInput').click()">
+        <img id="preview" src="" alt="미리보기">
+        <p id="uploadText">클릭해서 이미지 선택</p>
+    </div>
+
+    <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="previewImage()">
+    <button id="btn" onclick="predict()" disabled>예측하기</button>
+
+    <div class="result-box" id="resultBox">
+        <div class="animal" id="animal"></div>
+        <div class="label" id="label"></div>
+        <div class="conf" id="conf"></div>
+    </div>
+</div>
+
+<script>
+    function previewImage() {
+        const file = document.getElementById('fileInput').files[0];
+        if (!file) return;
+        const img = document.getElementById('preview');
+        img.src = URL.createObjectURL(file);
+        img.style.display = 'block';
+        document.getElementById('uploadText').style.display = 'none';
+        document.getElementById('btn').disabled = false;
+        document.getElementById('resultBox').style.display = 'none';
+    }
+
+    function predict() {
+        const file = document.getElementById('fileInput').files[0];
+        if (!file) return;
+
+        const btn = document.getElementById('btn');
+        btn.textContent = '예측 중...';
+        btn.disabled = true;
+
+        const formData = new FormData();
+        formData.append('image', file);
+
+        fetch('/predict', {method: 'POST', body: formData})
+            .then(res => res.json())
+            .then(data => {
+                const box = document.getElementById('resultBox');
+                const label = document.getElementById('label');
+                box.style.display = 'block';
+
+                if (data.result === '알 수 없는 날씨') {
+                    box.classList.add('unknown');
+                    label.classList.add('unknown');
+                    document.getElementById('conf').textContent = '날씨 사진을 올려주세요';
+                } else {
+                    box.classList.remove('unknown');
+                    label.classList.remove('unknown');
+                    document.getElementById('conf').textContent = '확률: ' + data.confidence;
+                }
+
+                document.getElementById('animal').textContent = data.emoji;
+                document.getElementById('label').textContent = data.result;
+                btn.textContent = '예측하기';
+                btn.disabled = false;
+            });
+    }
+</script>
+</body>
+</html>
