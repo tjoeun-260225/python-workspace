@@ -98,6 +98,10 @@ print(f"전처리 후 shape : {X_train.shape}") # 전처리 후 shape : (25000, 
               input_length=최대컬럼길이),
 
     # SimpleRNN : 순서를 기억하면서 읽는 핵심 레이어
+    # units 기억공간 개수
+    # 기억공간  8칸 (너무 작음)
+    # 기억공간 32칸 (기     본)
+    # 기억공간 64칸 (더 복잡한 문장 기억 가능)
     SimpleRNN(units=32),
 
     # Dense : 최종적으로 긍/부 정 0~1 사이 확률로 출력
