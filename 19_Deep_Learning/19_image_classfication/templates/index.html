@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>이미지 분류기</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            width: 100%;
+            max-width: 560px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+        }
+
+        h1 {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #1a1a1a;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: #888;
+            margin-bottom: 28px;
+        }
+
+        .upload-area {
+            border: 2px dashed #d0d0d0;
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.2s;
+            margin-bottom: 20px;
+        }
+
+        .upload-area:hover {
+            border-color: #4f46e5;
+        }
+
+        .upload-area.dragover {
+            border-color: #4f46e5;
+            background: #f5f3ff;
+        }
+
+        .upload-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+
+        .upload-text {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .upload-text span {
+            color: #4f46e5;
+            font-weight: 500;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        #preview {
+            width: 100%;
+            max-height: 300px;
+            object-fit: contain;
+            border-radius: 10px;
+            display: none;
+            margin-bottom: 20px;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background: #4f46e5;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: #4338ca;
+        }
+
+        button:disabled {
+            background: #a5b4fc;
+            cursor: not-allowed;
+        }
+
+        #result {
+            margin-top: 24px;
+            display: none;
+        }
+
+        .result-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 12px;
+        }
+
+        .result-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .result-rank {
+            font-size: 13px;
+            font-weight: 600;
+            color: #4f46e5;
+            min-width: 20px;
+        }
+
+        .result-bar-wrap {
+            flex: 1;
+        }
+
+        .result-label {
+            font-size: 14px;
+            color: #1a1a1a;
+            margin-bottom: 4px;
+        }
+
+        .result-bar-bg {
+            background: #f0f0f0;
+            border-radius: 999px;
+            height: 8px;
+            overflow: hidden;
+        }
+
+        .result-bar {
+            height: 8px;
+            border-radius: 999px;
+            background: #4f46e5;
+            transition: width 0.5s ease;
+        }
+
+        .result-score {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a1a1a;
+            min-width: 48px;
+            text-align: right;
+        }
+
+        .loading {
+            text-align: center;
+            color: #888;
+            font-size: 14px;
+            padding: 16px 0;
+        }
+    </style>
+</head>
+<body>
+<div class="card">
+    <h1>이미지 분류기</h1>
+    <p class="subtitle">사진을 업로드하면 무엇인지 분석해드립니다</p>
+
+    <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+        <div class="upload-icon">🖼️</div>
+        <p class="upload-text"><span>클릭</span> 하거나 사진을 드래그하세요</p>
+    </div>
+
+    <input type="file" id="fileInput" accept="image/*">
+    <img id="preview">
+
+    <button id="btn" onclick="분류하기()" disabled>사진을 먼저 선택해주세요</button>
+
+    <div id="result"></div>
+</div>
+
+<script>
+    const fileInput = document.getElementById('fileInput');
+    const uploadArea = document.getElementById('uploadArea');
+    const preview = document.getElementById('preview');
+    const btn = document.getElementById('btn');
+
+    fileInput.addEventListener('change', function () {
+        const file = this.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = e => {
+            preview.src = e.target.result;
+            preview.style.display = 'block';
+            uploadArea.style.display = 'none';
+            btn.disabled = false;
+            btn.innerText = '분류하기';
+            document.getElementById('result').style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+    });
+
+    uploadArea.addEventListener('dragover', e => {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+    });
+
+    uploadArea.addEventListener('dragleave', () => {
+        uploadArea.classList.remove('dragover');
+    });
+
+    uploadArea.addEventListener('drop', e => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        const file = e.dataTransfer.files[0];
+        if (file && file.type.startsWith('image/')) {
+            fileInput.files = e.dataTransfer.files;
+            fileInput.dispatchEvent(new Event('change'));
+        }
+    });
+
+    async function 분류하기() {
+        const file = fileInput.files[0];
+        if (!file) return;
+
+        btn.disabled = true;
+        btn.innerText = '분석 중...';
+
+        const resultDiv = document.getElementById('result');
+        resultDiv.style.display = 'block';
+        resultDiv.innerHTML = '<p class="loading">모델이 분석하고 있습니다...</p>';
+
+        const formData = new FormData();
+        formData.append('image', file);
+
+        try {
+            const response = await fetch('/predict', {method: 'POST', body: formData});
+            const data = await response.json();
+
+            const colors = ['#4f46e5', '#7c3aed', '#a855f7'];
+
+            let html = '<p class="result-title">분류 결과</p>';
+            data.results.forEach((r, i) => {
+                html += `
+                        <div class="result-item">
+                            <div class="result-rank">${i + 1}</div>
+                            <div class="result-bar-wrap">
+                                <div class="result-label">${r.label}</div>
+                                <div class="result-bar-bg">
+                                    <div class="result-bar" style="width: ${r.score}%; background: ${colors[i]}"></div>
+                                </div>
+                            </div>
+                            <div class="result-score">${r.score}%</div>
+                        </div>`;
+            });
+
+            resultDiv.innerHTML = html;
+        } catch (e) {
+            resultDiv.innerHTML = '<p style="color:#e53e3e; font-size:14px;">오류가 발생했습니다. 다시 시도해주세요.</p>';
+        }
+
+        btn.disabled = false;
+        btn.innerText = '다시 분류하기';
+    }
+</script>
+</body>
+</html>
