@@ -6,7 +6,6 @@ import io
 
 app = Flask(__name__)
 
-# TODO 1: 모델 파일 이름을 채우세요
 # 힌트: 'models/weather_model.keras'
 model = load_model('models/weather_model.keras')
 
