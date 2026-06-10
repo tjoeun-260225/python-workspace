@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>리뷰 별점 예측기</title>
+    <style>
+        /* ── 기본 레이아웃 ── */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f0f4f8;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 40px 16px;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 36px;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+        }
+
+        h1 { font-size: 1.6rem; color: #1a1a2e; margin-bottom: 6px; }
+        .sub { color: #888; font-size: 0.9rem; margin-bottom: 28px; }
+
+        /* ── 입력창 ── */
+        textarea {
+            width: 100%;
+            height: 130px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 14px;
+            font-size: 1rem;
+            resize: vertical;
+            transition: border 0.2s;
+            outline: none;
+        }
+        textarea:focus { border-color: #667eea; }
+
+        /* ── 버튼 ── */
+        button {
+            margin-top: 14px;
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        button:hover   { opacity: 0.88; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* ── 결과 영역 ── */
+        #result { margin-top: 32px; display: none; }
+
+        .stars-big {
+            font-size: 2.8rem;
+            text-align: center;
+            letter-spacing: 4px;
+            margin-bottom: 6px;
+        }
+        .score-label {
+            text-align: center;
+            color: #555;
+            font-size: 0.95rem;
+            margin-bottom: 24px;
+        }
+
+        /* ── 막대 차트 ── */
+        .chart { display: flex; flex-direction: column; gap: 10px; }
+
+        .bar-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .bar-label { width: 48px; font-size: 0.85rem; color: #555; flex-shrink: 0; }
+        .bar-track {
+            flex: 1;
+            height: 22px;
+            background: #eef0f4;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        .bar-fill {
+            height: 100%;
+            border-radius: 6px;
+            transition: width 0.6s cubic-bezier(.4,0,.2,1);
+            background: linear-gradient(90deg, #667eea, #764ba2);
+        }
+        .bar-fill.highlight { background: linear-gradient(90deg, #f6d365, #fda085); }
+        .bar-pct { width: 44px; font-size: 0.85rem; color: #444; text-align: right; flex-shrink: 0; }
+
+        .error { color: #e53e3e; text-align: center; margin-top: 16px; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+<div class="card">
+    <h1>⭐ 리뷰 별점 예측기</h1>
+    <p class="sub">리뷰를 작성하면 예상 별점을 실시간으로 분석해드려요 (한국어·영어 지원)</p>
+
+    <textarea id="reviewInput" placeholder="예) 배송도 빠르고 품질도 너무 좋아요. 다음에도 꼭 구매할게요."></textarea>
+    <button id="predictBtn" onclick="predict()">별점 예측하기</button>
+
+    <div id="result">
+        <div class="stars-big" id="starsDisplay"></div>
+        <div class="score-label" id="scoreLabel"></div>
+        <div class="chart" id="chart"></div>
+    </div>
+    <div class="error" id="errorMsg"></div>
+</div>
+
+<script>
+    const LABELS = ["1점 ★", "2점 ★★", "3점 ★★★", "4점 ★★★★", "5점 ★★★★★"];
+    const STARS  = ["⭐", "⭐⭐", "⭐⭐⭐", "⭐⭐⭐⭐", "⭐⭐⭐⭐⭐"];
+
+    async function predict() {
+        const text    = document.getElementById("reviewInput").value.trim();
+        const btn     = document.getElementById("predictBtn");
+        const errDiv  = document.getElementById("errorMsg");
+
+        errDiv.textContent = "";
+        document.getElementById("result").style.display = "none";
+
+        if (!text) { errDiv.textContent = "리뷰를 입력해주세요."; return; }
+
+        btn.disabled    = true;
+        btn.textContent = "분석 중...";
+
+        try {
+            const res  = await fetch("/predict", {
+                method : "POST",
+                headers: { "Content-Type": "application/json" },
+                body   : JSON.stringify({ text }),
+            });
+            const data = await res.json();
+
+            if (data.error) { errDiv.textContent = data.error; return; }
+
+            renderResult(data);
+
+        } catch (e) {
+            errDiv.textContent = "서버 오류가 발생했어요. 다시 시도해주세요.";
+        } finally {
+            btn.disabled    = false;
+            btn.textContent = "별점 예측하기";
+        }
+    }
+
+    function renderResult(data) {
+        // ── 큰 별 표시 ──
+        document.getElementById("starsDisplay").textContent = STARS[data.stars - 1];
+        document.getElementById("scoreLabel").textContent   =
+            `예상 별점: ${data.stars}점 / 5점  (확신도 ${(data.score * 100).toFixed(1)}%)`;
+
+        // ── 막대 차트 ──
+        const chart = document.getElementById("chart");
+        chart.innerHTML = "";
+
+        data.all_probs.forEach((prob, i) => {
+            const pct       = (prob * 100).toFixed(1);
+            const highlight = (i === data.stars - 1) ? "highlight" : "";
+
+            chart.innerHTML += `
+        <div class="bar-row">
+          <span class="bar-label">${LABELS[i]}</span>
+          <div class="bar-track">
+            <div class="bar-fill ${highlight}" style="width: 0%"
+                 data-target="${pct}"></div>
+          </div>
+          <span class="bar-pct">${pct}%</span>
+        </div>`;
+        });
+
+        document.getElementById("result").style.display = "block";
+
+        // 애니메이션: 0% → 실제 값
+        requestAnimationFrame(() => {
+            document.querySelectorAll(".bar-fill").forEach(bar => {
+                bar.style.width = bar.dataset.target + "%";
+            });
+        });
+    }
+
+    // Enter 키로도 예측 가능
+    document.addEventListener("DOMContentLoaded", () => {
+        document.getElementById("reviewInput").addEventListener("keydown", e => {
+            if (e.ctrlKey && e.key === "Enter") predict();
+        });
+    });
+</script>
+</body>
+</html>
