@@ -1,5 +1,6 @@
 import tensorflow as tf
-
+# GPT 를 이용해서 현재 데이터셋과 현재 컴퓨터 사양을 기준으로
+# 제대로된 keras 모델 만드는 방향
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Input
 import matplotlib.pyplot as plt
