@@ -87,7 +87,7 @@ dot = layers.Flatten()(dot)
 # 시그모이드로 0~1 출력(진짜  쌍인지 아닌지)
 output = layers.Dense(1, activation='sigmoid')(dot)
 
-model = Model(inputs=[input_target, input_context], output=output)
+model = Model(inputs=[input_target, input_context], outputs=output)
 model.compile(loss='binary_crossentropy', optimizer="adam")
 model.summary()
 
