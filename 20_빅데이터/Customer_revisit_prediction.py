@@ -85,3 +85,8 @@ new_customer = pd.DataFrame([{
 prob = 로봇뇌.predict_proba(new_customer)[0][1]
 print(f"고객의 재방문 확률:{prob * 100:.1f}%")
 print("재방문 가능성", "높음" if prob > 0.5 else "낮음")
+"""
+현재 예제 sklearn              머신러닝
+다음 예제 tensorflow + cuda    딥러닝 신경망
+응용 예제 huggingFace          리뷰 감성분석, 고객 문의 자동 분류
+"""
